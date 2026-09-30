@@ -186,3 +186,39 @@ def test_cancel_permissions_and_started_cancel(client, db, room):
     assert client.post(f"{API}/bookings/{mine.id}/cancel", headers=auth(client, EMPLOYEE)).status_code == 403
     assert client.post(f"{API}/bookings/{mine.id}/cancel", headers=auth(client, ADMIN)).status_code == 200
     assert client.post(f"{API}/bookings/999999/cancel", headers=auth(client, ADMIN)).status_code == 404
+
+
+# --- чтение ---
+
+def test_calendar_range_filters(client, db, room):
+    h = auth(client, EMPLOYEE)
+    other = db.scalar(select(Room).where(Room.name == "Алтай"))
+    create(client, h, room, "10:00", "11:00")
+    create(client, h, other, "10:00", "11:00")
+    cancelled = create(client, h, room, "12:00", "13:00").json()
+    client.post(f"{API}/bookings/{cancelled['id']}/cancel", headers=h)
+    p = {"from": "2030-01-15T00:00:00+03:00", "to": "2030-01-16T00:00:00+03:00"}
+    got = client.get(f"{API}/bookings", headers=h, params=p).json()
+    assert len(got) == 2  # отменённая не показывается
+    assert len(client.get(f"{API}/bookings", headers=h, params={**p, "room_id": room.id}).json()) == 1
+    empty = {"from": "2030-01-15T11:00:00+03:00", "to": "2030-01-15T12:00:00+03:00"}  # встык с 10–11
+    assert client.get(f"{API}/bookings", headers=h, params=empty).json() == []
+    assert client.get(f"{API}/bookings", headers=h, params={"from": p["to"], "to": p["from"]}).status_code == 422
+    too_long = {"from": p["from"], "to": "2030-03-01T00:00:00+03:00"}
+    assert error(client.get(f"{API}/bookings", headers=h, params=too_long)) == "VALIDATION_ERROR"
+    assert client.get(f"{API}/bookings", headers=h).status_code == 422
+
+
+def test_my_bookings_scopes_and_get_one(client, db, room):
+    h = auth(client, EMPLOYEE)
+    future = create(client, h, room).json()
+    gone = create(client, h, room, "12:00", "13:00").json()
+    client.post(f"{API}/bookings/{gone['id']}/cancel", headers=h)
+    past = insert(db, room, EMPLOYEE[0], -120, -60)
+    insert(db, room, ADMIN[0], 120, 180)  # чужая не попадает
+    ids = lambda scope: [b["id"] for b in client.get(f"{API}/bookings/my", headers=h, params={"scope": scope}).json()]  # noqa: E731
+    assert ids("upcoming") == [future["id"]] and ids("cancelled") == [gone["id"]] and ids("past") == [past.id]
+    assert client.get(f"{API}/bookings/my", headers=h, params={"scope": "x"}).status_code == 422
+    one = client.get(f"{API}/bookings/{future['id']}", headers=auth(client, ADMIN)).json()
+    assert one["id"] == future["id"] and one["can_edit"] is True  # админ
+    assert client.get(f"{API}/bookings/999999", headers=h).status_code == 404

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -121,3 +121,36 @@ def cancel(db: Session, user: User, booking_id: int) -> BookingOut:
         b.status, b.cancelled_by, b.cancelled_at = BookingStatus.cancelled, user.id, _now()
         db.commit()
     return to_out(b, user)
+
+
+MAX_RANGE = timedelta(days=31)
+
+
+def get(db: Session, user: User, booking_id: int) -> BookingOut:
+    b = db.get(Booking, booking_id)
+    if b is None:
+        raise AppError(404, "NOT_FOUND", "Бронь не найдена")
+    return to_out(b, user)
+
+
+def list_range(db: Session, user: User, start: datetime, end: datetime, room_id: int | None) -> list[BookingOut]:
+    """Активные брони, пересекающие [start, end) — данные календаря."""
+    if not start < end or end - start > MAX_RANGE:
+        raise AppError(422, "VALIDATION_ERROR", "Период: from < to и не более 31 дня")
+    q = select(Booking).where(Booking.status == BookingStatus.active, Booking.start_at < end, Booking.end_at > start)
+    if room_id is not None:
+        q = q.where(Booking.room_id == room_id)
+    return [to_out(b, user) for b in db.scalars(q.order_by(Booking.start_at, Booking.room_id))]
+
+
+def list_my(db: Session, user: User, scope: str) -> list[BookingOut]:
+    now = _now()
+    q = select(Booking).where(Booking.organizer_id == user.id)
+    if scope == "cancelled":
+        q = q.where(Booking.status == BookingStatus.cancelled)
+    elif scope == "past":
+        q = q.where(Booking.status == BookingStatus.active, Booking.end_at <= now)
+    else:
+        q = q.where(Booking.status == BookingStatus.active, Booking.end_at > now)
+    q = q.order_by(Booking.start_at if scope == "upcoming" else Booking.start_at.desc())
+    return [to_out(b, user) for b in db.scalars(q)]
