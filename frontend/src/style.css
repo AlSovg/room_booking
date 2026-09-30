@@ -14,8 +14,6 @@
 body { margin: 0; background: var(--bg); }
 button, input, select, textarea { font-family: inherit; }
 .icon { flex-shrink: 0; }
-.login { display: grid; gap: 0.75rem; max-width: 20rem; margin: 4rem auto; }
-.login label { display: grid; gap: 0.25rem; }
 .error { color: #d33; margin: 0; }
 .filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-bottom: 1rem; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: 1rem; }
@@ -93,9 +91,35 @@ button, input, select, textarea { font-family: inherit; }
 .dot { width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--brand); flex-shrink: 0; }
 .empty { margin: 0; padding: 32px 16px; text-align: center; color: var(--muted); }
 main { max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 24px 32px; }
+main.bare { padding: 0; }
 .tabbar { display: none; }
 
-@media (max-width: 1023px) {
+/* Общие элементы форм */
+.btn { height: 44px; padding: 0 16px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); color: var(--ink); font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+.btn:disabled { opacity: 0.6; cursor: default; }
+.btn-primary { border-color: transparent; background: var(--brand-strong); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #004FAD; }
+.btn-lg { height: 48px; font-size: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.control { position: relative; display: block; }
+.control > .icon { position: absolute; left: 14px; top: 15px; color: var(--muted); pointer-events: none; }
+.control input { width: 100%; height: 48px; box-sizing: border-box; padding: 0 44px 0 42px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); font-size: 15px; color: var(--ink); }
+.control input:focus { outline: 2px solid var(--brand); outline-offset: -1px; border-color: transparent; }
+.control .reveal { position: absolute; right: 4px; top: 4px; width: 40px; height: 40px; color: var(--muted); }
+.alert { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid var(--danger-border); border-radius: var(--radius); background: var(--danger-soft); color: var(--danger-ink); font-size: 14px; font-weight: 500; }
+.alert .icon { color: var(--danger); }
+
+/* Вход */
+.login-page { min-height: 100dvh; box-sizing: border-box; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
+.login-logo { margin: 0; font-size: 20px; gap: 12px; }
+.login-logo .logo-mark { width: 40px; height: 40px; border-radius: 11px; }
+.login { width: 100%; max-width: 400px; box-sizing: border-box; padding: 36px; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 12px 40px rgba(25, 25, 26, 0.06); display: flex; flex-direction: column; gap: 20px; }
+.login-head { display: grid; gap: 6px; }
+.login-head h1 { margin: 0; font-size: 26px; letter-spacing: -0.02em; }
+.login-head span { font-size: 15px; color: var(--muted); }
+.login.invalid .control input { border-color: var(--danger); }
+.login-note { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+
   .user-name { display: none; }
   .user-btn { padding-right: 8px; gap: 4px; }
 }
@@ -109,6 +133,7 @@ main { max-width: 1440px; margin: 0 auto; box-sizing: border-box; padding: 24px 
   .bell { position: static; }
   .panel { position: fixed; top: 56px; left: 0; right: 0; width: auto; max-height: calc(100dvh - 56px); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
   main { padding: 16px; }
+  .login { padding: 24px 20px; }
   main.with-tabbar { padding-bottom: calc(76px + env(safe-area-inset-bottom)); }
   .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: 0 8px env(safe-area-inset-bottom); background: var(--surface); border-top: 1px solid var(--border); display: flex; }
   .tabbar a { flex: 1; height: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--muted); text-decoration: none; }

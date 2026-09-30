@@ -32,7 +32,7 @@ const isActive = (to: string) => route.path === to || (to !== "/" && route.path.
     <NotificationBell />
     <UserMenu />
   </header>
-  <main :class="{ 'with-tabbar': auth.user }"><RouterView /></main>
+  <main :class="auth.user ? 'with-tabbar' : 'bare'"><RouterView /></main>
   <nav v-if="auth.user" class="tabbar" aria-label="Разделы">
     <RouterLink v-for="s in SECTIONS" :key="s.to" :to="s.to" :aria-current="isActive(s.to) ? 'page' : undefined">
       <Icon :name="s.icon" :size="24" :stroke-width="isActive(s.to) ? 2.2 : 1.8" />{{ s.label }}
