@@ -229,7 +229,7 @@ CREATE TABLE refresh_tokens (
 | 403 | `FORBIDDEN`, `ACCOUNT_DISABLED` | нет прав / пользователь заблокирован |
 | 404 | `NOT_FOUND` | объекта нет |
 | 409 | `BOOKING_CONFLICT` | пересечение (AC-1, AC-6) |
-| 409 | `EMAIL_TAKEN`, `EQUIPMENT_IN_USE`, `SELF_LOCKOUT` | конфликты справочников, BR-13 |
+| 409 | `EMAIL_TAKEN`, `ROOM_NAME_TAKEN`, `EQUIPMENT_NAME_TAKEN`, `EQUIPMENT_IN_USE`, `SELF_LOCKOUT` | конфликты справочников, BR-13 |
 | 422 | `VALIDATION_ERROR` | ошибка формата (Pydantic) |
 | 422 | `WRONG_PASSWORD` | неверный текущий пароль при смене (не 401: фронт не должен уходить в refresh) |
 | 422 | `INVALID_DURATION`, `NOT_ALIGNED`, `OUTSIDE_WORKING_HOURS`, `BOOKING_IN_PAST`, `CAPACITY_EXCEEDED`, `ROOM_INACTIVE`, `BOOKING_STARTED`, `BOOKING_FINISHED` | нарушения BR-2…7 |

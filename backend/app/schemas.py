@@ -53,3 +53,46 @@ class PasswordChange(BaseModel):
 class UserWithPassword(BaseModel):
     user: UserOut
     temporary_password: str
+
+
+Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+
+
+class EquipmentIn(BaseModel):
+    name: Name
+
+
+class EquipmentOut(EquipmentIn):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+
+
+class RoomCreate(BaseModel):
+    name: Name
+    location: str | None = Field(None, max_length=200)
+    capacity: int = Field(gt=0, le=1000)
+    description: str | None = Field(None, max_length=2000)
+    is_active: bool = True
+    equipment_ids: list[int] = []
+
+
+class RoomUpdate(BaseModel):
+    name: Name | None = None
+    location: str | None = Field(None, max_length=200)
+    capacity: int | None = Field(None, gt=0, le=1000)
+    description: str | None = Field(None, max_length=2000)
+    is_active: bool | None = None
+    equipment_ids: list[int] | None = None
+
+
+class RoomOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    location: str | None
+    capacity: int
+    description: str | None
+    is_active: bool
+    equipment: list[EquipmentOut]
