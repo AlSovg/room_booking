@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints
 
-from app.models import UserRole
+from app.models import BookingStatus, UserRole
 
 Email = Annotated[str, StringConstraints(strip_whitespace=True, max_length=254,
                                          pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
@@ -96,3 +96,35 @@ class RoomOut(BaseModel):
     description: str | None
     is_active: bool
     equipment: list[EquipmentOut]
+
+
+Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+
+
+class BookingCreate(BaseModel):
+    room_id: int
+    title: Title
+    start_at: AwareDatetime
+    end_at: AwareDatetime
+    attendees: int = Field(ge=1, le=1000)
+
+
+class OrganizerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    full_name: str
+
+
+class BookingOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    room_id: int
+    title: str
+    start_at: datetime
+    end_at: datetime
+    attendees: int
+    status: BookingStatus
+    organizer: OrganizerOut
+    can_edit: bool = False  # считается на сервере для текущего пользователя

@@ -1,3 +1,6 @@
+from datetime import time
+from zoneinfo import ZoneInfo
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +16,13 @@ class Settings(BaseSettings):
     refresh_ttl_days: int = 7
     max_failed_attempts: int = 5
     lockout_minutes: int = 15
+    org_timezone: str = "Europe/Moscow"
+    work_start: time = time(8)
+    work_end: time = time(20)
+
+    @property
+    def tz(self) -> ZoneInfo:
+        return ZoneInfo(self.org_timezone)
 
 
 settings = Settings()
