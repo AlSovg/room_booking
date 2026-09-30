@@ -13,7 +13,10 @@ async function logout() {
 
 <template>
   <header v-if="auth.user">
-    <nav><RouterLink to="/">Календарь</RouterLink></nav>
+    <nav>
+      <RouterLink to="/">Календарь</RouterLink>
+      <RouterLink to="/rooms">Комнаты</RouterLink>
+    </nav>
     <span>{{ auth.user.full_name }}</span>
     <button @click="logout">Выйти</button>
   </header>

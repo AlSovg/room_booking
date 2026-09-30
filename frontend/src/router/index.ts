@@ -13,6 +13,7 @@ export const router = createRouter({
   routes: [
     { path: "/login", component: () => import("@/pages/LoginPage.vue"), meta: { public: true } },
     { path: "/", component: () => import("@/pages/HomePage.vue") },
+    { path: "/rooms", component: () => import("@/pages/RoomsPage.vue") },
   ],
 });
 
