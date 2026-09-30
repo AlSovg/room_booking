@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { addDays, ago, dayRange, hhmm, localParts, nextSlot, roomStatus, zonedToUtc } from "./time";
+import { addDays, ago, dayRange, dayTitle, freeWindow, hhmm, localParts, nextSlot, plural, roomStatus, zonedToUtc } from "./time";
 
 test("локальное время организации (UTC+3) ↔ UTC", () => {
   expect(zonedToUtc("2030-01-15", 10 * 60).toISOString()).toBe("2030-01-15T07:00:00.000Z");
@@ -35,4 +35,13 @@ test("nextSlot: округление вверх до шага, утро → на
   expect(nextSlot(zonedToUtc("2030-01-15", 6 * 60))).toEqual({ date: "2030-01-15", start: 480, end: 540 });
   expect(nextSlot(zonedToUtc("2030-01-15", 19 * 60 + 30))).toEqual({ date: "2030-01-15", start: 1170, end: 1200 });
   expect(nextSlot(zonedToUtc("2030-01-15", 19 * 60 + 50))).toEqual({ date: "2030-01-16", start: 480, end: 540 });
+});
+
+test("freeWindow, plural, dayTitle", () => {
+  const busy = [{ start: 600, end: 690 }, { start: 960, end: 1020 }, { start: 700, end: 720 }];
+  expect(freeWindow(busy, 840, 900)).toEqual({ from: 720, to: 960 });
+  expect(freeWindow([], 840, 900)).toEqual({ from: 480, to: 1200 });
+  expect([1, 3, 5, 21].map((n) => plural(n, ["комната", "комнаты", "комнат"]))).toEqual(["1 комната", "3 комнаты", "5 комнат", "21 комната"]);
+  expect(dayTitle("2030-01-16", "2030-01-15")).toBe("Завтра");
+  expect(dayTitle("2030-01-18", "2030-01-15")).toBe("Пятница, 18 января");
 });

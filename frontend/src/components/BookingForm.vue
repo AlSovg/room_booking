@@ -6,17 +6,19 @@ import Icon from "@/components/Icon.vue";
 import { DAY_END, DAY_START, STEP, hhmm, localParts, todayLocal, zonedToUtc } from "@/utils/time";
 
 type Room = components["schemas"]["RoomOut"];
+type Booking = components["schemas"]["BookingOut"];
 type Conflict = { title: string; start_at: string; end_at: string; organizer: string };
 
-const props = defineProps<{ rooms: Room[]; roomId: number; start: Date; end: Date }>();
+// booking — режим изменения существующей брони
+const props = defineProps<{ rooms: Room[]; roomId: number; start: Date; end: Date; booking?: Booking }>();
 const emit = defineEmits<{ created: []; close: []; show: [date: string] }>();
 
 const date = ref(localParts(props.start).date);
 const from = ref(localParts(props.start).minutes);
 const to = ref(localParts(props.end).minutes || 24 * 60);
 const roomId = ref(props.roomId);
-const title = ref("");
-const attendees = ref(1);
+const title = ref(props.booking?.title ?? "");
+const attendees = ref(props.booking?.attendees ?? 1);
 const busy = ref(false);
 const error = ref<string | null>(null);
 const conflict = ref<Conflict | null>(null);
@@ -39,12 +41,13 @@ async function submit() {
   busy.value = true;
   error.value = null;
   conflict.value = null;
-  const { data, error: e } = await api.POST("/api/v1/bookings", {
-    body: {
-      room_id: roomId.value, title: title.value.trim(), attendees: attendees.value,
-      start_at: zonedToUtc(date.value, from.value).toISOString(), end_at: zonedToUtc(date.value, to.value).toISOString(),
-    },
-  });
+  const body = {
+    room_id: roomId.value, title: title.value.trim(), attendees: attendees.value,
+    start_at: zonedToUtc(date.value, from.value).toISOString(), end_at: zonedToUtc(date.value, to.value).toISOString(),
+  };
+  const { data, error: e } = props.booking
+    ? await api.PATCH("/api/v1/bookings/{booking_id}", { params: { path: { booking_id: props.booking.id } }, body })
+    : await api.POST("/api/v1/bookings", { body });
   busy.value = false;
   if (data) return emit("created");
   const c = (e as { error?: { code?: string; details?: { conflicting_booking?: Conflict } } })?.error;
@@ -58,7 +61,7 @@ async function submit() {
     <form class="modal-body" @submit.prevent="submit">
       <div class="modal-head">
         <div>
-          <h2 id="booking-title">Новая бронь</h2>
+          <h2 id="booking-title">{{ booking ? "Изменить бронь" : "Новая бронь" }}</h2>
           <span>{{ meta }}</span>
         </div>
         <button type="button" class="icon-btn modal-close" aria-label="Закрыть" @click="close"><Icon name="X" /></button>
@@ -112,7 +115,7 @@ async function submit() {
 
       <div class="modal-actions">
         <button type="button" class="btn" @click="close">Отмена</button>
-        <button class="btn btn-primary" :disabled="busy || !title.trim()"><Icon name="Check" :size="18" />Забронировать</button>
+        <button class="btn btn-primary" :disabled="busy || !title.trim()"><Icon name="Check" :size="18" />{{ booking ? "Сохранить" : "Забронировать" }}</button>
       </div>
     </form>
   </dialog>

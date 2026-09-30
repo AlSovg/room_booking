@@ -68,3 +68,25 @@ export function nextSlot(now = new Date()): { date: string; start: number; end: 
   if (start + STEP > DAY_END) [date, start] = [addDays(date, 1), DAY_START];
   return { date, start, end: Math.min(start + 60, DAY_END) };
 }
+
+/** Свободное окно вокруг [start, end) в пределах рабочего дня: от конца предыдущей брони до начала следующей. */
+export function freeWindow(busy: { start: number; end: number }[], start: number, end: number): { from: number; to: number } {
+  return {
+    from: Math.max(DAY_START, ...busy.filter((b) => b.end <= start).map((b) => b.end)),
+    to: Math.min(DAY_END, ...busy.filter((b) => b.start >= end).map((b) => b.start)),
+  };
+}
+
+const PLURAL = new Intl.PluralRules("ru");
+/** plural(5, ["участник", "участника", "участников"]) → «5 участников» */
+export const plural = (n: number, [one, few, many]: [string, string, string]) =>
+  `${n} ${{ one, few, many }[PLURAL.select(n) as "one" | "few" | "many"] ?? many}`;
+
+const DAY_TITLE = new Intl.DateTimeFormat("ru", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
+/** «Сегодня», «Завтра», «Вчера» или «Пятница, 2 октября» */
+export function dayTitle(date: string, today = todayLocal()): string {
+  const near = { [today]: "Сегодня", [addDays(today, 1)]: "Завтра", [addDays(today, -1)]: "Вчера" }[date];
+  if (near) return near;
+  const t = DAY_TITLE.format(new Date(`${date}T00:00:00Z`));
+  return t[0].toUpperCase() + t.slice(1);
+}
