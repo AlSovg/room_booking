@@ -9,6 +9,7 @@
     "gen:api": "node scripts/gen-api.mjs"
   },
   "dependencies": {
+    "lucide-vue-next": "^1.0.0",
     "openapi-fetch": "^0.17.0",
     "pinia": "^4.0.3",
     "vue": "^3.5.43",
