@@ -61,6 +61,13 @@ cp .env.example .env
 .venv/Scripts/python -m pytest               # тесты (нужен запущенный db)
 .venv/Scripts/uvicorn app.main:app --reload  # API, /docs — Swagger
 ```
+```
+cd frontend
+npm install
+npm run gen:api   # OpenAPI бэкенда → src/api/schema.d.ts (после изменений API)
+npm run dev       # Vite, проксирует /api на :8000
+npm run build     # vue-tsc + сборка; npm test — Vitest
+```
 Миграции: после `alembic revision --autogenerate` заменить `%%` на `%` в CHECK и вручную держать `CREATE EXTENSION btree_gist`.
 
 ## LLM Wiki
