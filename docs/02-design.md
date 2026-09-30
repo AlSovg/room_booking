@@ -232,7 +232,7 @@ CREATE TABLE refresh_tokens (
 | 409 | `EMAIL_TAKEN`, `ROOM_NAME_TAKEN`, `EQUIPMENT_NAME_TAKEN`, `EQUIPMENT_IN_USE`, `SELF_LOCKOUT` | конфликты справочников, BR-13 |
 | 422 | `VALIDATION_ERROR` | ошибка формата (Pydantic) |
 | 422 | `WRONG_PASSWORD` | неверный текущий пароль при смене (не 401: фронт не должен уходить в refresh) |
-| 422 | `INVALID_DURATION`, `NOT_ALIGNED`, `OUTSIDE_WORKING_HOURS`, `BOOKING_IN_PAST`, `CAPACITY_EXCEEDED`, `ROOM_INACTIVE`, `BOOKING_STARTED`, `BOOKING_FINISHED` | нарушения BR-2…7 |
+| 422 | `INVALID_DURATION`, `NOT_ALIGNED`, `OUTSIDE_WORKING_HOURS`, `BOOKING_IN_PAST`, `CAPACITY_EXCEEDED`, `ROOM_INACTIVE`, `BOOKING_STARTED`, `BOOKING_FINISHED`, `BOOKING_CANCELLED` | нарушения BR-2…7 |
 | 429 | `TOO_MANY_ATTEMPTS` | блокировка входа, заголовок `Retry-After` |
 
 ## 4. Безопасность

@@ -109,6 +109,14 @@ class BookingCreate(BaseModel):
     attendees: int = Field(ge=1, le=1000)
 
 
+class BookingUpdate(BaseModel):
+    room_id: int | None = None
+    title: Title | None = None
+    start_at: AwareDatetime | None = None
+    end_at: AwareDatetime | None = None
+    attendees: int | None = Field(None, ge=1, le=1000)
+
+
 class OrganizerOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

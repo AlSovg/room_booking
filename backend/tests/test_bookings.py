@@ -92,3 +92,97 @@ def test_cancelled_booking_does_not_block(client, db, room):
     db.get(Booking, b["id"]).status = "cancelled"
     db.flush()
     assert create(client, h, room).status_code == 201
+
+
+# --- изменение и отмена ---
+
+def patch(client, h, booking_id, **body):
+    return client.patch(f"{API}/bookings/{booking_id}", headers=h, json=body)
+
+
+def insert(db, room, user_email, start_delta_min, end_delta_min, title="Встреча"):
+    """Бронь напрямую в БД, минуя правила: старт/конец — смещения от начала текущего 15-минутного слота."""
+    from app.domain.rules import floor_step
+    base = floor_step(datetime.now(timezone.utc))
+    user = db.scalar(select(User).where(User.email == user_email))
+    b = Booking(room_id=room.id, organizer_id=user.id, title=title, attendees=2,
+                start_at=base + timedelta(minutes=start_delta_min), end_at=base + timedelta(minutes=end_delta_min))
+    db.add(b)
+    db.flush()
+    return b
+
+
+def test_patch_own_booking_fields_and_time(client, room):
+    h = auth(client, EMPLOYEE)
+    b = create(client, h, room).json()
+    r = patch(client, h, b["id"], title="Ревью", attendees=6, **slot("12:00", "13:30"))
+    assert r.status_code == 200 and r.json()["title"] == "Ревью" and r.json()["attendees"] == 6
+    assert datetime.fromisoformat(r.json()["start_at"]) == datetime(2030, 1, 15, 9, 0, tzinfo=timezone.utc)
+
+
+def test_patch_without_time_change_and_self_overlap_ok(client, room):
+    h = auth(client, EMPLOYEE)
+    b = create(client, h, room, "10:00", "11:00").json()
+    assert patch(client, h, b["id"], title="Новое").status_code == 200          # AC-4
+    assert patch(client, h, b["id"], **slot("10:15", "11:15")).status_code == 200  # сдвиг внутри себя же
+    assert patch(client, h, b["id"]).status_code == 200                          # пустой патч
+
+
+def test_patch_conflict_and_room_move(client, db, room):
+    h = auth(client, EMPLOYEE)
+    create(client, h, room, "10:00", "11:00")
+    b = create(client, h, room, "12:00", "13:00").json()
+    r = patch(client, h, b["id"], **slot("10:30", "11:30"))
+    assert r.status_code == 409 and error(r) == "BOOKING_CONFLICT"
+    assert patch(client, h, b["id"], **slot("11:00", "12:00")).status_code == 200  # встык
+    small = db.scalar(select(Room).where(Room.name == "Урал"))  # вместимость 4
+    assert error(patch(client, h, b["id"], room_id=small.id, attendees=5)) == "CAPACITY_EXCEEDED"
+    assert patch(client, h, b["id"], room_id=small.id, attendees=4).json()["room_id"] == small.id
+    assert patch(client, h, b["id"], room_id=999999).status_code == 404
+    assert error(patch(client, h, b["id"], start_at="2030-01-15T10:00:00+03:00", end_at="2030-01-15T10:00:00+03:00")) \
+        == "INVALID_DURATION"
+
+
+def test_patch_permissions(client, room):
+    b = create(client, auth(client, EMPLOYEE), room).json()
+    other = create(client, auth(client, ADMIN), room, "14:00", "15:00").json()
+    h_emp = auth(client, EMPLOYEE)
+    assert patch(client, h_emp, other["id"], title="x").status_code == 403       # AC-8
+    assert patch(client, auth(client, ADMIN), b["id"], title="От админа").status_code == 200
+    assert patch(client, h_emp, 999999, title="x").status_code == 404
+
+
+def test_started_booking_can_only_be_shortened(client, db, room):
+    h = auth(client, EMPLOYEE)
+    b = insert(db, room, EMPLOYEE[0], -30, 60)  # идёт: началась 30 минут назад
+    assert error(patch(client, h, b.id, title="x")) == "BOOKING_STARTED"
+    assert error(patch(client, h, b.id, end_at=(b.end_at + timedelta(hours=1)).isoformat())) == "BOOKING_STARTED"
+    r = patch(client, h, b.id, end_at=(b.end_at - timedelta(minutes=30)).isoformat())
+    assert r.status_code == 200
+
+
+def test_finished_booking_cannot_change_or_cancel(client, db, room):
+    h = auth(client, EMPLOYEE)
+    b = insert(db, room, EMPLOYEE[0], -120, -60)
+    assert error(patch(client, h, b.id, title="x")) == "BOOKING_FINISHED"
+    assert error(client.post(f"{API}/bookings/{b.id}/cancel", headers=h)) == "BOOKING_FINISHED"
+
+
+def test_cancel_frees_slot_and_is_idempotent(client, room):
+    h = auth(client, EMPLOYEE)
+    b = create(client, h, room).json()
+    assert create(client, auth(client, ADMIN), room).status_code == 409
+    r = client.post(f"{API}/bookings/{b['id']}/cancel", headers=h)
+    assert r.status_code == 200 and r.json()["status"] == "cancelled" and r.json()["can_edit"] is False
+    assert client.post(f"{API}/bookings/{b['id']}/cancel", headers=h).status_code == 200
+    assert create(client, auth(client, ADMIN), room).status_code == 201
+    assert error(patch(client, h, b["id"], title="x")) == "BOOKING_CANCELLED"
+
+
+def test_cancel_permissions_and_started_cancel(client, db, room):
+    b = create(client, auth(client, EMPLOYEE), room).json()
+    assert client.post(f"{API}/bookings/{b['id']}/cancel", headers=auth(client, ADMIN)).status_code == 200
+    mine = insert(db, room, ADMIN[0], -30, 60)  # чужая идущая бронь
+    assert client.post(f"{API}/bookings/{mine.id}/cancel", headers=auth(client, EMPLOYEE)).status_code == 403
+    assert client.post(f"{API}/bookings/{mine.id}/cancel", headers=auth(client, ADMIN)).status_code == 200
+    assert client.post(f"{API}/bookings/999999/cancel", headers=auth(client, ADMIN)).status_code == 404
