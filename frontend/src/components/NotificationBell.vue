@@ -2,12 +2,25 @@
 import { onBeforeUnmount, onMounted, ref } from "vue";
 import { api } from "@/api/client";
 import type { components } from "@/api/schema";
+import Icon from "@/components/Icon.vue";
+import type { IconName } from "@/icons-injection";
+import { useDismiss } from "@/utils/dismiss";
+import { ago } from "@/utils/time";
+
+type Kind = components["schemas"]["NotificationType"];
+const KINDS: Record<Kind, { title: string; icon: IconName }> = {
+  reminder: { title: "Скоро начнётся", icon: "clock" },
+  changed: { title: "Бронь изменена", icon: "pencil" },
+  cancelled: { title: "Бронь отменена", icon: "circle-x" },
+};
 
 const POLL = 30_000; // решение 8: опрос раз в 30 с
 const count = ref(0);
 const open = ref(false);
 const items = ref<components["schemas"]["NotificationOut"][]>([]);
 let timer: number;
+const root = ref<HTMLElement | null>(null);
+useDismiss(root, open);
 
 async function refreshCount() {
   count.value = (await api.GET("/api/v1/notifications/unread-count")).data?.count ?? count.value;
@@ -44,14 +57,33 @@ onBeforeUnmount(() => clearInterval(timer));
 </script>
 
 <template>
-  <div class="bell">
-    <button aria-label="Уведомления" @click="toggle">🔔<b v-if="count" class="badge">{{ count }}</b></button>
-    <div v-if="open" class="panel">
-      <button v-if="count" @click="readAll">Прочитать все</button>
-      <p v-if="!items.length">Уведомлений нет</p>
+  <div ref="root" class="bell">
+    <button
+      class="icon-btn"
+      :class="{ active: open }"
+      :aria-label="count ? `Уведомления, ${count} непрочитанных` : 'Уведомления'"
+      :aria-expanded="open"
+      @click="toggle"
+    >
+      <Icon name="bell" :size="22" :stroke-width="1.8" />
+      <b v-if="count" class="count">{{ count }}</b>
+    </button>
+    <div v-if="open" class="popover panel" role="dialog" aria-label="Уведомления">
+      <div class="panel-head">
+        <h2>Уведомления<span v-if="count" class="pill">{{ count }} новых</span></h2>
+        <button v-if="count" class="link-btn" @click="readAll"><Icon name="checks" :size="16" />Прочитать все</button>
+      </div>
+      <p v-if="!items.length" class="empty">Уведомлений нет</p>
       <ul v-else>
-        <li v-for="n in items" :key="n.id" :class="{ unread: !n.is_read }" @click="read(n)">
-          {{ n.message }}<small>{{ new Date(n.created_at).toLocaleString("ru") }}</small>
+        <li v-for="n in items" :key="n.id">
+          <button :class="{ unread: !n.is_read }" @click="read(n)">
+            <span class="kind" :class="n.type"><Icon :name="KINDS[n.type].icon" :size="18" /></span>
+            <span class="body">
+              <span class="row"><b>{{ KINDS[n.type].title }}</b><small>{{ ago(n.created_at) }}</small></span>
+              <span class="text">{{ n.message }}</span>
+            </span>
+            <span v-if="!n.is_read" class="dot" aria-label="Не прочитано" />
+          </button>
         </li>
       </ul>
     </div>

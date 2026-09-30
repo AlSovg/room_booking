@@ -36,3 +36,14 @@ export const dayRange = (date: string) => ({
 
 export const hhmm = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
+
+/** Подпись времени уведомления: «5 мин назад», «сегодня, 09:10», «вчера, 18:12», «28.09, 14:00». */
+export function ago(iso: string, now = Date.now()): string {
+  const min = Math.floor((now - Date.parse(iso)) / 60_000);
+  if (min < 1) return "только что";
+  if (min < 60) return `${min} мин назад`;
+  const { date, minutes } = localParts(new Date(iso));
+  const today = localParts(new Date(now)).date;
+  const day = date === today ? "сегодня" : date === addDays(today, -1) ? "вчера" : `${date.slice(8)}.${date.slice(5, 7)}`;
+  return `${day}, ${hhmm(minutes)}`;
+}

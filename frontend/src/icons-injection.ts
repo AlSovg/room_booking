@@ -1,7 +1,7 @@
 import {
   Ban, Bell, Bookmark, Calendar, ChartColumn, Check, CheckCheck, ChevronDown, ChevronLeft, ChevronRight,
   CircleAlert, CircleX, Clock, Copy, DoorOpen, Download, Eye, EyeOff, KeyRound, Lock, LockOpen, LogIn, LogOut,
-  Mail, MapPin, Minus, Monitor, Pencil, Plus, Presentation, Projector, Search, Shield, SlidersHorizontal,
+  Mail, MapPin, Minus, Monitor, Pencil, Plus, Presentation, Projector, Search, Settings, Shield, SlidersHorizontal,
   Timer, Trash2, Users, Video, X,
 } from "lucide-vue-next";
 
@@ -39,6 +39,7 @@ export const ICONS = {
   "presentation": Presentation,
   "projector": Projector,
   "search": Search,
+  "settings": Settings,
   "shield": Shield,
   "sliders": SlidersHorizontal,
   "timer": Timer,

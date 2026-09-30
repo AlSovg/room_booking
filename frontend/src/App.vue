@@ -1,30 +1,41 @@
 <script setup lang="ts">
+import { useRoute } from "vue-router";
+import Icon from "@/components/Icon.vue";
 import NotificationBell from "@/components/NotificationBell.vue";
-import { useRouter } from "vue-router";
+import UserMenu from "@/components/UserMenu.vue";
+import type { IconName } from "@/icons-injection";
 import { useAuth } from "@/stores/auth";
 
 const auth = useAuth();
-const router = useRouter();
+const route = useRoute();
 
-async function logout() {
-  await auth.logout();
-  router.push("/login");
-}
+const SECTIONS: { to: string; label: string; icon: IconName }[] = [
+  { to: "/", label: "Календарь", icon: "calendar" },
+  { to: "/rooms", label: "Комнаты", icon: "door" },
+  { to: "/search", label: "Поиск", icon: "search" },
+  { to: "/my", label: "Мои брони", icon: "bookmark" },
+];
+// /rooms/5 подсвечивает «Комнаты»
+const isActive = (to: string) => route.path === to || (to !== "/" && route.path.startsWith(`${to}/`));
 </script>
 
 <template>
-  <header v-if="auth.user">
-    <nav>
-      <RouterLink to="/">Календарь</RouterLink>
-      <RouterLink to="/rooms">Комнаты</RouterLink>
-      <RouterLink to="/search">Поиск</RouterLink>
-      <RouterLink to="/my">Мои брони</RouterLink>
-      <RouterLink v-if="auth.user.role === 'admin'" to="/admin">Админка</RouterLink>
-      <RouterLink v-if="auth.user.role === 'admin'" to="/stats">Статистика</RouterLink>
+  <header v-if="auth.user" class="topbar">
+    <RouterLink to="/" class="logo">
+      <span class="logo-mark"><Icon name="calendar" :size="18" :stroke-width="2.2" /></span>Переговорные
+    </RouterLink>
+    <nav class="nav" aria-label="Основная навигация">
+      <RouterLink v-for="s in SECTIONS" :key="s.to" :to="s.to" :aria-current="isActive(s.to) ? 'page' : undefined">
+        {{ s.label }}
+      </RouterLink>
     </nav>
     <NotificationBell />
-    <span>{{ auth.user.full_name }}</span>
-    <button @click="logout">Выйти</button>
+    <UserMenu />
   </header>
-  <main><RouterView /></main>
+  <main :class="{ 'with-tabbar': auth.user }"><RouterView /></main>
+  <nav v-if="auth.user" class="tabbar" aria-label="Разделы">
+    <RouterLink v-for="s in SECTIONS" :key="s.to" :to="s.to" :aria-current="isActive(s.to) ? 'page' : undefined">
+      <Icon :name="s.icon" :size="24" :stroke-width="isActive(s.to) ? 2.2 : 1.8" />{{ s.label }}
+    </RouterLink>
+  </nav>
 </template>
