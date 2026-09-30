@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from pydantic import AwareDatetime
 from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import DB, CurrentUser, require_admin
@@ -15,6 +16,12 @@ def list_rooms(db: DB, _: CurrentUser, min_capacity: Annotated[int, Query(ge=1)]
                equipment_ids: EquipmentIds = [], include_inactive: bool = False) -> list[RoomOut]:
     return rooms.list_rooms(db, min_capacity=min_capacity, equipment_ids=equipment_ids,
                             include_inactive=include_inactive)
+
+
+@router.get("/rooms/available")  # до /rooms/{room_id}, иначе "available" не разберётся как id
+def available_rooms(db: DB, _: CurrentUser, start: AwareDatetime, end: AwareDatetime,
+                    min_capacity: Annotated[int, Query(ge=1)] = 1, equipment_ids: EquipmentIds = []) -> list[RoomOut]:
+    return rooms.available_rooms(db, start, end, min_capacity=min_capacity, equipment_ids=equipment_ids)
 
 
 @router.get("/rooms/{room_id}")

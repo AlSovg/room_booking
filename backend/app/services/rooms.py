@@ -1,9 +1,13 @@
-from sqlalchemy import select
+from datetime import datetime
+
+from sqlalchemy import exists, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
+from app.core.config import settings
 from app.core.errors import AppError
-from app.models import Equipment, Room
+from app.domain import rules
+from app.models import Booking, BookingStatus, Equipment, Room
 from app.schemas import EquipmentIn, RoomCreate, RoomUpdate
 
 
@@ -30,6 +34,17 @@ def filtered_rooms(*, min_capacity: int = 1, equipment_ids: list[int] = (), incl
 
 def list_rooms(db: Session, **filters) -> list[Room]:
     q = filtered_rooms(**filters).options(selectinload(Room.equipment)).order_by(Room.name)
+    return list(db.scalars(q))
+
+
+def available_rooms(db: Session, start: datetime, end: datetime, *, min_capacity: int = 1,
+                    equipment_ids: list[int] = ()) -> list[Room]:
+    """Активные комнаты без активной брони, пересекающей [start, end) (docs/02-design.md, п. 5.4)."""
+    rules.check_interval(start, end, settings.tz, settings.work_start, settings.work_end)
+    busy = exists().where(Booking.room_id == Room.id, Booking.status == BookingStatus.active,
+                          Booking.start_at < end, Booking.end_at > start)
+    q = (filtered_rooms(min_capacity=min_capacity, equipment_ids=equipment_ids).where(~busy)
+         .options(selectinload(Room.equipment)).order_by(Room.capacity, Room.name))
     return list(db.scalars(q))
 
 

@@ -222,3 +222,31 @@ def test_my_bookings_scopes_and_get_one(client, db, room):
     one = client.get(f"{API}/bookings/{future['id']}", headers=auth(client, ADMIN)).json()
     assert one["id"] == future["id"] and one["can_edit"] is True  # админ
     assert client.get(f"{API}/bookings/999999", headers=h).status_code == 404
+
+
+# --- поиск свободных ---
+
+def test_available_rooms(client, db, room):
+    h = auth(client, EMPLOYEE)
+    create(client, h, room, "10:00", "11:00")
+    cancelled = create(client, h, db.scalar(select(Room).where(Room.name == "Урал")), "10:00", "11:00").json()
+    client.post(f"{API}/bookings/{cancelled['id']}/cancel", headers=h)
+
+    def avail(start="10:00", end="11:00", **kw):
+        sl = slot(start, end)
+        r = client.get(f"{API}/rooms/available", headers=h,
+                       params={"start": sl["start_at"], "end": sl["end_at"], **kw})
+        assert r.status_code == 200, r.text
+        return [x["name"] for x in r.json()]
+
+    names = avail()
+    assert "Волга" not in names and "Урал" in names           # занятая исключена, отменённая не мешает
+    assert names == ["Урал", "Байкал", "Онега", "Алтай"]      # по вместимости, затем по названию
+    assert "Волга" in avail("11:00", "12:00")                 # встык
+    assert avail(min_capacity=8) == ["Онега", "Алтай"]
+    eq = {e["name"]: e["id"] for e in client.get(f"{API}/equipment", headers=h).json()}
+    assert avail(equipment_ids=[eq["Проектор"], eq["Видеоконференция"]]) == ["Онега", "Алтай"]
+    assert client.get(f"{API}/rooms/available", headers=h).status_code == 422
+    bad = client.get(f"{API}/rooms/available", headers=h,
+                     params={"start": "2030-01-15T10:00:00+03:00", "end": "2030-01-15T10:05:00+03:00"})
+    assert bad.status_code == 422 and error(bad) == "INVALID_DURATION"
