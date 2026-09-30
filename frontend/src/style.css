@@ -13,3 +13,17 @@ main { padding: 1rem; }
 .meta { color: #888; margin: 0 0 0.5rem; }
 .tags { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; padding: 0; margin: 0; }
 .tags li { background: #8883; border-radius: 0.25rem; padding: 0 0.4rem; font-size: 0.85rem; }
+.cal { display: grid; grid-template-columns: 3.5rem repeat(var(--cols), minmax(8rem, 1fr)); overflow-x: auto; user-select: none; }
+.cal .head { position: sticky; top: 0; background: Canvas; text-align: center; padding: 0.4rem; font-weight: 600; border-bottom: 1px solid #8886; }
+.cal .time { font-size: 0.75rem; color: #888; text-align: right; padding-right: 0.4rem; box-sizing: border-box; }
+.cal .col { position: relative; border-left: 1px solid #8884; }
+.cal .cell { height: 20px; box-sizing: border-box; cursor: pointer; }
+.cal .cell.hour { border-top: 1px solid #8883; }
+.cal .cell:hover { background: #4a90d922; }
+.cal .cell.past { background: #8882; cursor: not-allowed; }
+.cal .cell.busy { cursor: default; }
+.cal .cell.sel { background: #4a90d966; }
+.cal .booking { position: absolute; left: 2px; right: 2px; box-sizing: border-box; background: #8885; border-radius: 4px; padding: 2px 4px; font-size: 0.8rem; overflow: hidden; }
+.cal .booking.own { background: #4a90d9; color: #fff; }
+.cal .now { position: absolute; left: 0; right: 0; height: 2px; background: #d33; pointer-events: none; }
+.bar { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 0.75rem; }
