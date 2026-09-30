@@ -19,6 +19,7 @@ async function logout() {
       <RouterLink to="/rooms">Комнаты</RouterLink>
       <RouterLink to="/search">Поиск</RouterLink>
       <RouterLink to="/my">Мои брони</RouterLink>
+      <RouterLink v-if="auth.user.role === 'admin'" to="/admin">Админка</RouterLink>
     </nav>
     <NotificationBell />
     <span>{{ auth.user.full_name }}</span>
