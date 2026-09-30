@@ -15,6 +15,7 @@ export const router = createRouter({
     { path: "/", component: () => import("@/pages/HomePage.vue") },
     { path: "/rooms", component: () => import("@/pages/RoomsPage.vue") },
     { path: "/admin", component: () => import("@/pages/AdminPage.vue"), meta: { admin: true } },
+    { path: "/stats", component: () => import("@/pages/StatsPage.vue"), meta: { admin: true } },
     { path: "/search", component: () => import("@/pages/SearchPage.vue") },
     { path: "/my", component: () => import("@/pages/MyBookingsPage.vue") },
     { path: "/rooms/:id(\\d+)", component: () => import("@/pages/RoomPage.vue") },

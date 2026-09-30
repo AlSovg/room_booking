@@ -38,3 +38,7 @@ main { padding: 1rem; }
 .bell .panel li { padding: 0.4rem; border-bottom: 1px solid #8884; cursor: pointer; display: grid; }
 .bell .panel li.unread { font-weight: 600; background: #4a90d922; }
 .bell .panel small { color: #888; font-weight: normal; }
+.stats { border-collapse: collapse; margin-bottom: 1rem; }
+.stats th, .stats td { border: 1px solid #8884; padding: 0.25rem 0.6rem; text-align: left; }
+.heat td { width: 1.6rem; height: 1.6rem; padding: 0; }
+.heat th { font-weight: normal; font-size: 0.8rem; text-align: center; }
