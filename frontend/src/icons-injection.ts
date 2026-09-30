@@ -28,6 +28,7 @@ import {
   Monitor,
   Pencil,
   Plus,
+  Phone,
   Presentation,
   Projector,
   Search,
@@ -38,6 +39,7 @@ import {
   Trash2,
   Users,
   Video,
+  Wrench,
   X,
 } from "lucide-vue-next";
 
@@ -71,6 +73,7 @@ export const ICONS = {
   Minus,
   Monitor,
   Pencil,
+  Phone,
   Plus,
   Presentation,
   Projector,
@@ -82,7 +85,18 @@ export const ICONS = {
   Trash2,
   Users,
   Video,
+  Wrench,
   X,
 };
 
 export type IconName = keyof typeof ICONS;
+
+const EQUIPMENT_ICONS: Record<string, IconName> = {
+  "Проектор": "Projector",
+  "Экран": "Monitor",
+  "Маркерная доска": "Presentation",
+  "Видеоконференция": "Video",
+  "Телефон": "Phone",
+};
+/** Иконка оборудования по названию; новое оборудование из админки — гаечный ключ. */
+export const equipmentIcon = (name: string): IconName => EQUIPMENT_ICONS[name] ?? "Wrench";

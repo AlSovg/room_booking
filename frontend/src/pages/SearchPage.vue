@@ -53,7 +53,7 @@ async function search() {
   </form>
   <p v-if="error" class="error" role="alert">{{ error }}</p>
   <p v-else-if="rooms && !rooms.length">Свободных комнат нет</p>
-  <div v-else-if="rooms" class="grid">
+  <div v-else-if="rooms" class="room-grid">
     <RoomCard v-for="r in rooms" :key="r.id" :room="r">
       <button @click="chosen = r">Забронировать</button>
     </RoomCard>

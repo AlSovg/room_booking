@@ -47,3 +47,16 @@ export function ago(iso: string, now = Date.now()): string {
   const day = date === today ? "сегодня" : date === addDays(today, -1) ? "вчера" : `${date.slice(8)}.${date.slice(5, 7)}`;
   return `${day}, ${hhmm(minutes)}`;
 }
+
+/**
+ * Статус комнаты сейчас по сегодняшним броням (минуты от полуночи):
+ * занята — до конца текущей брони с учётом стыкующихся, свободна — до начала следующей (null = до конца дня).
+ */
+export function roomStatus(busy: { start: number; end: number }[], now: number): { busy: boolean; until: number | null } {
+  const sorted = [...busy].sort((a, b) => a.start - b.start);
+  const i = sorted.findIndex((b) => b.start <= now && now < b.end);
+  if (i < 0) return { busy: false, until: sorted.find((b) => b.start > now)?.start ?? null };
+  let until = sorted[i].end;
+  for (const b of sorted.slice(i + 1)) if (b.start <= until) until = Math.max(until, b.end);
+  return { busy: true, until };
+}
