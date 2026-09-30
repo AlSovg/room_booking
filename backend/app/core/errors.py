@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
+from app.domain.rules import RuleViolation
+
 
 class AppError(Exception):
     """Ошибка API в формате `{"error": {code, message, details}}` (docs/02-design.md, п. 3.3)."""
@@ -19,6 +21,10 @@ def register_error_handlers(app: FastAPI) -> None:
     @app.exception_handler(AppError)
     async def _app_error(_: Request, e: AppError):
         return JSONResponse(_body(e.code, e.message, e.details), e.status, e.headers)
+
+    @app.exception_handler(RuleViolation)
+    async def _rule(_: Request, e: RuleViolation):
+        return JSONResponse(_body(e.code, e.message), 422)
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, e: RequestValidationError):
