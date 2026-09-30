@@ -12,8 +12,9 @@ MAX_DAYS = 366
 
 ROOMS_SQL = text("""
 SELECT r.id AS room_id, r.name, count(b.id) AS bookings,
-       coalesce(sum(extract(epoch FROM least(b.end_at, :end) - greatest(b.start_at, :start)) / 60), 0)::int
-         AS booked_minutes
+       -- FILTER обязателен: least/greatest пропускают NULL, и комната без броней получила бы весь период
+       coalesce(sum(extract(epoch FROM least(b.end_at, :end) - greatest(b.start_at, :start)) / 60)
+                FILTER (WHERE b.id IS NOT NULL), 0)::int AS booked_minutes
 FROM rooms r
 LEFT JOIN bookings b ON b.room_id = r.id AND b.status = 'active' AND b.start_at < :end AND b.end_at > :start
 GROUP BY r.id ORDER BY r.name

@@ -14,8 +14,10 @@ def test_stats_numbers_csv_and_access(client, room):
     gone = create(client, emp, room, "15:00", "15:30").json()
     client.post(f"{API}/bookings/{gone['id']}/cancel", headers=emp)
 
-    r = next(x for x in get(client, adm, "rooms").json() if x["name"] == "Волга")
+    rooms = {x["name"]: x for x in get(client, adm, "rooms").json()}
+    r = rooms.pop("Волга")
     assert r["bookings"] == 1 and r["booked_minutes"] == 360 and r["utilization"] == 0.5
+    assert rooms and all(x["booked_minutes"] == 0 and x["utilization"] == 0 for x in rooms.values())  # без броней — ноль
 
     peaks = {(c["weekday"], c["hour"]): c["booked_minutes"] for c in get(client, adm, "peak-hours").json()}
     assert peaks[(2, 8)] == 60 and peaks[(2, 13)] == 60 and (2, 14) not in peaks and len(peaks) == 6
