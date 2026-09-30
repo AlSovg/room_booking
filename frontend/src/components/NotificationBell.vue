@@ -9,9 +9,9 @@ import { ago } from "@/utils/time";
 
 type Kind = components["schemas"]["NotificationType"];
 const KINDS: Record<Kind, { title: string; icon: IconName }> = {
-  reminder: { title: "Скоро начнётся", icon: "clock" },
-  changed: { title: "Бронь изменена", icon: "pencil" },
-  cancelled: { title: "Бронь отменена", icon: "circle-x" },
+  reminder: { title: "Скоро начнётся", icon: "Clock" },
+  changed: { title: "Бронь изменена", icon: "Pencil" },
+  cancelled: { title: "Бронь отменена", icon: "CircleX" },
 };
 
 const POLL = 30_000; // решение 8: опрос раз в 30 с
@@ -65,13 +65,13 @@ onBeforeUnmount(() => clearInterval(timer));
       :aria-expanded="open"
       @click="toggle"
     >
-      <Icon name="bell" :size="22" :stroke-width="1.8" />
+      <Icon name="Bell" :size="22" :stroke-width="1.8" />
       <b v-if="count" class="count">{{ count }}</b>
     </button>
     <div v-if="open" class="popover panel" role="dialog" aria-label="Уведомления">
       <div class="panel-head">
         <h2>Уведомления<span v-if="count" class="pill">{{ count }} новых</span></h2>
-        <button v-if="count" class="link-btn" @click="readAll"><Icon name="checks" :size="16" />Прочитать все</button>
+        <button v-if="count" class="link-btn" @click="readAll"><Icon name="CheckCheck" :size="16" />Прочитать все</button>
       </div>
       <p v-if="!items.length" class="empty">Уведомлений нет</p>
       <ul v-else>

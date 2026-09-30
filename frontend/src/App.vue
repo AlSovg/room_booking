@@ -10,10 +10,10 @@ const auth = useAuth();
 const route = useRoute();
 
 const SECTIONS: { to: string; label: string; icon: IconName }[] = [
-  { to: "/", label: "Календарь", icon: "calendar" },
-  { to: "/rooms", label: "Комнаты", icon: "door" },
-  { to: "/search", label: "Поиск", icon: "search" },
-  { to: "/my", label: "Мои брони", icon: "bookmark" },
+  { to: "/", label: "Календарь", icon: "Calendar" },
+  { to: "/rooms", label: "Комнаты", icon: "DoorOpen" },
+  { to: "/search", label: "Поиск", icon: "Search" },
+  { to: "/my", label: "Мои брони", icon: "Bookmark" },
 ];
 // /rooms/5 подсвечивает «Комнаты»
 const isActive = (to: string) => route.path === to || (to !== "/" && route.path.startsWith(`${to}/`));
@@ -22,7 +22,7 @@ const isActive = (to: string) => route.path === to || (to !== "/" && route.path.
 <template>
   <header v-if="auth.user" class="topbar">
     <RouterLink to="/" class="logo">
-      <span class="logo-mark"><Icon name="calendar" :size="18" :stroke-width="2.2" /></span>Переговорные
+      <span class="logo-mark"><Icon name="Calendar" :size="18" :stroke-width="2.2" /></span>Переговорные
     </RouterLink>
     <nav class="nav" aria-label="Основная навигация">
       <RouterLink v-for="s in SECTIONS" :key="s.to" :to="s.to" :aria-current="isActive(s.to) ? 'page' : undefined">

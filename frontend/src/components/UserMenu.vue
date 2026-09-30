@@ -34,7 +34,7 @@ async function logout() {
     >
       <span class="avatar">{{ initials }}</span>
       <span class="user-name">{{ user.full_name }}</span>
-      <Icon name="chevron-down" :size="16" class="user-chevron" />
+      <Icon name="ChevronDown" :size="16" class="user-chevron" />
     </button>
     <div v-if="open" class="popover menu" role="menu" aria-label="Меню пользователя">
       <div class="menu-head">
@@ -42,11 +42,11 @@ async function logout() {
         <small>Роль: {{ user.role === "admin" ? "администратор" : "сотрудник" }}</small>
       </div>
       <template v-if="user.role === 'admin'">
-        <RouterLink role="menuitem" to="/admin" @click="open = false"><Icon name="settings" :size="18" />Администрирование</RouterLink>
-        <RouterLink role="menuitem" to="/stats" @click="open = false"><Icon name="chart" :size="18" />Статистика</RouterLink>
+        <RouterLink role="menuitem" to="/admin" @click="open = false"><Icon name="Settings" :size="18" />Администрирование</RouterLink>
+        <RouterLink role="menuitem" to="/stats" @click="open = false"><Icon name="ChartColumn" :size="18" />Статистика</RouterLink>
         <hr />
       </template>
-      <button role="menuitem" @click="logout"><Icon name="logout" :size="18" />Выйти</button>
+      <button role="menuitem" @click="logout"><Icon name="LogOut" :size="18" />Выйти</button>
     </div>
   </div>
 </template>
