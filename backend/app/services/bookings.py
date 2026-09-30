@@ -7,8 +7,9 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.errors import AppError
 from app.domain import rules
-from app.models import Booking, BookingStatus, Room, User, UserRole
+from app.models import Booking, BookingStatus, NotificationType, Room, User, UserRole
 from app.schemas import BookingCreate, BookingOut, BookingUpdate
+from app.services.notifications import notify_organizer
 
 
 def _now() -> datetime:
@@ -110,6 +111,7 @@ def update(db: Session, user: User, booking_id: int, data: BookingUpdate) -> Boo
 
     for k, v in changes.items():
         setattr(b, k, v)
+    notify_organizer(db, user, b, NotificationType.changed)
     commit_or_conflict(db, b.room_id, start, end, exclude_id=b.id)
     return to_out(b, user)
 
@@ -119,6 +121,7 @@ def cancel(db: Session, user: User, booking_id: int) -> BookingOut:
     if b.status == BookingStatus.active:  # повторная отмена — no-op
         rules.check_cancellable(b.end_at, _now())
         b.status, b.cancelled_by, b.cancelled_at = BookingStatus.cancelled, user.id, _now()
+        notify_organizer(db, user, b, NotificationType.cancelled)
         db.commit()
     return to_out(b, user)
 

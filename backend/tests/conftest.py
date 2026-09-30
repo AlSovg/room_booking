@@ -10,6 +10,9 @@ from app.main import app
 from app.seed import EMPLOYEE_PASSWORD, seed
 
 
+settings.scheduler_enabled = False  # напоминания в тестах вызываются напрямую
+
+
 @pytest.fixture
 def db():
     conn = engine.connect()

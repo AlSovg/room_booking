@@ -3,7 +3,7 @@ from typing import Annotated
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints
 
-from app.models import BookingStatus, UserRole
+from app.models import BookingStatus, NotificationType, UserRole
 
 Email = Annotated[str, StringConstraints(strip_whitespace=True, max_length=254,
                                          pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
@@ -136,3 +136,18 @@ class BookingOut(BaseModel):
     status: BookingStatus
     organizer: OrganizerOut
     can_edit: bool = False  # считается на сервере для текущего пользователя
+
+
+class NotificationOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    type: NotificationType
+    booking_id: int | None
+    message: str
+    is_read: bool
+    created_at: datetime
+
+
+class UnreadCount(BaseModel):
+    count: int
