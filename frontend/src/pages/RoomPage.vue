@@ -3,9 +3,10 @@ import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
+import BookingForm from "@/components/BookingForm.vue";
 import CalendarGrid, { type Column, type Item, type Selection } from "@/components/CalendarGrid.vue";
 import { useAuth } from "@/stores/auth";
-import { addDays, hhmm, localParts, todayLocal, zonedToUtc } from "@/utils/time";
+import { addDays, localParts, todayLocal, zonedToUtc } from "@/utils/time";
 
 const auth = useAuth();
 const route = useRoute();
@@ -15,12 +16,14 @@ const room = ref<components["schemas"]["RoomOut"] | null>(null);
 const bookings = ref<components["schemas"]["BookingOut"][]>([]);
 const selection = ref<Selection | null>(null);
 const loading = ref(true);
+const version = ref(0); // инкремент → перезагрузка броней
 const error = ref<string | null>(null);
 
 /** Понедельник недели, в которую попадает date. */
 const monday = computed(() => addDays(date.value, -((new Date(`${date.value}T00:00:00Z`).getUTCDay() + 6) % 7)));
 
 watchEffect(async (onCleanup) => {
+  void version.value;
   let stale = false;
   onCleanup(() => (stale = true));
   const query = {
@@ -59,12 +62,10 @@ const move = (n: number) => {
   selection.value = null;
 };
 
-const label = computed(() => {
-  const s = selection.value;
-  if (!s) return null;
-  const from = localParts(s.start).minutes, to = localParts(s.end).minutes || 1440;
-  return `${s.col}, ${hhmm(from)}–${hhmm(to)}`;
-});
+const created = () => {
+  selection.value = null;
+  version.value++;
+};
 </script>
 
 <template>
@@ -75,8 +76,11 @@ const label = computed(() => {
     <button @click="date = todayLocal()">Сегодня</button>
     <button @click="move(1)" aria-label="Следующая неделя">▶</button>
     <input v-model="date" type="date" />
-    <span v-if="label">Выбрано: {{ label }}</span>
   </div>
+  <BookingForm
+    v-if="selection && room" :key="selection.start.getTime()" :room="room"
+    :start="selection.start" :end="selection.end" @created="created" @close="selection = null"
+  />
   <p v-if="error" class="error" role="alert">{{ error }}</p>
   <p v-else-if="loading && !room">Загрузка…</p>
   <CalendarGrid v-else :columns="columns" :items="items" :selection="selection" @select="selection = $event" />

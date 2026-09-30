@@ -2,9 +2,10 @@
 import { computed, ref, watchEffect } from "vue";
 import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
+import BookingForm from "@/components/BookingForm.vue";
 import CalendarGrid, { type Column, type Item, type Selection } from "@/components/CalendarGrid.vue";
 import { useAuth } from "@/stores/auth";
-import { addDays, dayRange, hhmm, localParts, todayLocal } from "@/utils/time";
+import { addDays, dayRange, todayLocal } from "@/utils/time";
 
 const auth = useAuth();
 const date = ref(todayLocal());
@@ -13,9 +14,11 @@ const rooms = ref<components["schemas"]["RoomOut"][]>([]);
 const bookings = ref<components["schemas"]["BookingOut"][]>([]);
 const selection = ref<Selection | null>(null);
 const loading = ref(true);
+const version = ref(0); // инкремент → перезагрузка броней
 const error = ref<string | null>(null);
 
 watchEffect(async (onCleanup) => {
+  void version.value;
   let stale = false;
   onCleanup(() => (stale = true));
   const query = { min_capacity: Math.max(1, minCapacity.value || 1) };
@@ -44,12 +47,12 @@ const move = (n: number) => {
   selection.value = null;
 };
 
-const label = computed(() => {
-  const s = selection.value;
-  if (!s) return null;
-  const from = localParts(s.start).minutes, to = localParts(s.end).minutes || 1440;
-  return `${columns.value.find((c) => c.key === s.col)?.label}, ${hhmm(from)}–${hhmm(to)}`;
-});
+const selRoom = computed(() => rooms.value.find((r) => String(r.id) === selection.value?.col));
+
+const created = () => {
+  selection.value = null;
+  version.value++;
+};
 </script>
 
 <template>
@@ -59,8 +62,11 @@ const label = computed(() => {
     <button @click="move(1)" aria-label="Следующий день">▶</button>
     <input v-model="date" type="date" />
     <label>Мин. вместимость <input v-model.number="minCapacity" type="number" min="1" /></label>
-    <span v-if="label">Выбрано: {{ label }}</span>
   </div>
+  <BookingForm
+    v-if="selection && selRoom" :key="selection.start.getTime() + selection.col" :room="selRoom"
+    :start="selection.start" :end="selection.end" @created="created" @close="selection = null"
+  />
   <p v-if="error" class="error" role="alert">{{ error }}</p>
   <p v-else-if="loading && !rooms.length">Загрузка…</p>
   <p v-else-if="!rooms.length">Нет комнат под выбранные условия</p>
