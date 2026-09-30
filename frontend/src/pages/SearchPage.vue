@@ -59,7 +59,7 @@ async function search() {
     </RoomCard>
   </div>
   <BookingForm
-    v-if="chosen" :key="chosen.id" :room="chosen" :start="interval().start" :end="interval().end"
+    v-if="chosen && rooms" :key="chosen.id" :rooms="rooms" :room-id="chosen.id" :start="interval().start" :end="interval().end"
     @created="chosen = null; search()" @close="chosen = null"
   />
 </template>

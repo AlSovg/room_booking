@@ -60,3 +60,11 @@ export function roomStatus(busy: { start: number; end: number }[], now: number):
   for (const b of sorted.slice(i + 1)) if (b.start <= until) until = Math.max(until, b.end);
   return { busy: true, until };
 }
+
+/** Ближайший час с начала следующего шага; если день кончился — завтра с начала дня. */
+export function nextSlot(now = new Date()): { date: string; start: number; end: number } {
+  const p = localParts(now);
+  let date = p.date, start = Math.max(Math.ceil(p.minutes / STEP) * STEP, DAY_START);
+  if (start + STEP > DAY_END) [date, start] = [addDays(date, 1), DAY_START];
+  return { date, start, end: Math.min(start + 60, DAY_END) };
+}

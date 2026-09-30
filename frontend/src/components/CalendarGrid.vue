@@ -2,14 +2,14 @@
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import { DAY_END, DAY_START, STEP, hhmm, localParts, zonedToUtc } from "@/utils/time";
 
-export interface Column { key: string; label: string; date: string; sub?: string } // sub — число дня в шапке недели
+export interface Column { key: string; label: string; date: string; sub?: string; hint?: string } // sub — число дня, hint — вторая строка
 export interface Item { id: number; col: string; start: string; end: string; title: string; own: boolean }
 export interface Selection { col: string; start: Date; end: Date }
 
-const props = defineProps<{ columns: Column[]; items: Item[]; selection: Selection | null }>();
+const props = defineProps<{ columns: Column[]; items: Item[]; selection: Selection | null; row?: number }>();
 const emit = defineEmits<{ select: [Selection] }>();
 
-const ROW = 18; // px, совпадает с .cell в style.css
+const ROW = props.row ?? 18; // px на шаг сетки, передаётся в CSS как --row
 const ROWS = (DAY_END - DAY_START) / STEP;
 const rows = Array.from({ length: ROWS }, (_, i) => i);
 const now = ref(new Date());
@@ -108,8 +108,9 @@ const isOver = (it: Item) => new Date(it.end).getTime() <= now.value.getTime();
 <template>
   <div class="cal" :style="{ '--cols': columns.length, '--row': ROW + 'px' }">
     <div class="corner" />
-    <div v-for="c in columns" :key="c.key" class="head" :class="{ today: c.sub && isToday(c) }">
+    <div v-for="c in columns" :key="c.key" class="head" :class="{ today: c.sub && isToday(c), stacked: c.hint }">
       <span class="head-label">{{ c.label }}</span><span v-if="c.sub" class="head-num">{{ c.sub }}</span>
+      <span v-if="c.hint" class="head-hint">{{ c.hint }}</span>
     </div>
 
     <div class="times">

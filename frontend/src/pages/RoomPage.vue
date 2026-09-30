@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watchEffect } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
@@ -8,7 +8,8 @@ import CalendarGrid, { type Column, type Item, type Selection } from "@/componen
 import Icon from "@/components/Icon.vue";
 import { equipmentIcon } from "@/icons-injection";
 import { useAuth } from "@/stores/auth";
-import { DAY_END, DAY_START, STEP, addDays, hhmm, localParts, roomStatus, todayLocal, zonedToUtc } from "@/utils/time";
+import { useMobile } from "@/utils/mobile";
+import { addDays, hhmm, localParts, nextSlot, roomStatus, todayLocal, zonedToUtc } from "@/utils/time";
 
 const auth = useAuth();
 const route = useRoute();
@@ -46,11 +47,7 @@ watchEffect(async (onCleanup) => {
 });
 
 // на телефоне сетка показывает один день, выбранный в полоске дней
-const mq = window.matchMedia("(max-width: 767px)");
-const mobile = ref(mq.matches);
-const onMq = () => (mobile.value = mq.matches);
-mq.addEventListener("change", onMq);
-onBeforeUnmount(() => mq.removeEventListener("change", onMq));
+const mobile = useMobile();
 
 const utc = (d: string) => new Date(`${d}T00:00:00Z`);
 const weekday = new Intl.DateTimeFormat("ru", { weekday: "short", timeZone: "UTC" });
@@ -72,14 +69,11 @@ const status = computed(() => {
   return roomStatus(busy, now.minutes);
 });
 
-/** «Забронировать» без выделения: ближайший час с начала следующего шага. */
+/** «Забронировать» без выделения — ближайший час. */
 function quickBook() {
-  const now = localParts(new Date());
-  let day = now.date, start = Math.ceil(now.minutes / STEP) * STEP;
-  if (start < DAY_START) start = DAY_START;
-  if (start + STEP > DAY_END) [day, start] = [addDays(day, 1), DAY_START];
-  date.value = day;
-  selection.value = { col: day, start: zonedToUtc(day, start), end: zonedToUtc(day, Math.min(start + 60, DAY_END)) };
+  const s = nextSlot();
+  date.value = s.date;
+  selection.value = { col: s.date, start: zonedToUtc(s.date, s.start), end: zonedToUtc(s.date, s.end) };
 }
 const items = computed<Item[]>(() =>
   bookings.value.map((b) => ({
@@ -91,6 +85,11 @@ const items = computed<Item[]>(() =>
 const move = (n: number) => {
   date.value = addDays(date.value, n * (mobile.value ? 1 : 7));
   selection.value = null;
+};
+
+const show = (d: string) => {
+  selection.value = null;
+  date.value = d;
 };
 
 const created = () => {
@@ -142,8 +141,8 @@ const created = () => {
     </div>
 
     <BookingForm
-      v-if="selection && room" :key="selection.start.getTime()" :room="room"
-      :start="selection.start" :end="selection.end" @created="created" @close="selection = null"
+      v-if="selection && room" :key="selection.start.getTime()" :rooms="[room]" :room-id="room.id"
+      :start="selection.start" :end="selection.end" @created="created" @close="selection = null" @show="show"
     />
     <p v-if="error" class="alert" role="alert">{{ error }}</p>
     <p v-else-if="loading && !room" class="empty">Загрузка…</p>

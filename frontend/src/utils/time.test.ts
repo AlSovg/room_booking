@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { addDays, ago, dayRange, hhmm, localParts, roomStatus, zonedToUtc } from "./time";
+import { addDays, ago, dayRange, hhmm, localParts, nextSlot, roomStatus, zonedToUtc } from "./time";
 
 test("локальное время организации (UTC+3) ↔ UTC", () => {
   expect(zonedToUtc("2030-01-15", 10 * 60).toISOString()).toBe("2030-01-15T07:00:00.000Z");
@@ -28,4 +28,11 @@ test("roomStatus: занята до конца цепочки броней, св
   expect(roomStatus(b, 690)).toEqual({ busy: false, until: 840 }); // полуоткрытый интервал
   expect(roomStatus(b, 910)).toEqual({ busy: false, until: null });
   expect(roomStatus([], 600)).toEqual({ busy: false, until: null });
+});
+
+test("nextSlot: округление вверх до шага, утро → начало дня, вечер → завтра", () => {
+  expect(nextSlot(zonedToUtc("2030-01-15", 10 * 60 + 5))).toEqual({ date: "2030-01-15", start: 615, end: 675 });
+  expect(nextSlot(zonedToUtc("2030-01-15", 6 * 60))).toEqual({ date: "2030-01-15", start: 480, end: 540 });
+  expect(nextSlot(zonedToUtc("2030-01-15", 19 * 60 + 30))).toEqual({ date: "2030-01-15", start: 1170, end: 1200 });
+  expect(nextSlot(zonedToUtc("2030-01-15", 19 * 60 + 50))).toEqual({ date: "2030-01-16", start: 480, end: 540 });
 });
