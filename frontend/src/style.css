@@ -31,3 +31,10 @@ main { padding: 1rem; }
 .booking-form .error { flex-basis: 100%; }
 .list { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
 .list li { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.bell { position: relative; }
+.bell .badge { background: #d33; color: #fff; border-radius: 1rem; padding: 0 0.35rem; margin-left: 0.25rem; font-size: 0.75rem; }
+.bell .panel { position: absolute; right: 0; z-index: 10; width: 20rem; max-height: 24rem; overflow-y: auto; background: Canvas; border: 1px solid #8886; border-radius: 0.5rem; padding: 0.5rem; }
+.bell .panel ul { list-style: none; padding: 0; margin: 0.5rem 0 0; }
+.bell .panel li { padding: 0.4rem; border-bottom: 1px solid #8884; cursor: pointer; display: grid; }
+.bell .panel li.unread { font-weight: 600; background: #4a90d922; }
+.bell .panel small { color: #888; font-weight: normal; }

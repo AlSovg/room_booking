@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import NotificationBell from "@/components/NotificationBell.vue";
 import { useRouter } from "vue-router";
 import { useAuth } from "@/stores/auth";
 
@@ -19,6 +20,7 @@ async function logout() {
       <RouterLink to="/search">Поиск</RouterLink>
       <RouterLink to="/my">Мои брони</RouterLink>
     </nav>
+    <NotificationBell />
     <span>{{ auth.user.full_name }}</span>
     <button @click="logout">Выйти</button>
   </header>
