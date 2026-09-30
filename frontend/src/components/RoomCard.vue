@@ -6,7 +6,7 @@ defineProps<{ room: components["schemas"]["RoomOut"] }>();
 
 <template>
   <article class="card">
-    <h3>{{ room.name }}</h3>
+    <h3><RouterLink :to="`/rooms/${room.id}`">{{ room.name }}</RouterLink></h3>
     <p class="meta">{{ room.location ?? "—" }} · до {{ room.capacity }} чел.</p>
     <p v-if="room.description">{{ room.description }}</p>
     <ul class="tags">

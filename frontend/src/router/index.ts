@@ -14,6 +14,7 @@ export const router = createRouter({
     { path: "/login", component: () => import("@/pages/LoginPage.vue"), meta: { public: true } },
     { path: "/", component: () => import("@/pages/HomePage.vue") },
     { path: "/rooms", component: () => import("@/pages/RoomsPage.vue") },
+    { path: "/rooms/:id(\\d+)", component: () => import("@/pages/RoomPage.vue") },
   ],
 });
 
