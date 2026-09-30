@@ -16,6 +16,7 @@ async function logout() {
     <nav>
       <RouterLink to="/">Календарь</RouterLink>
       <RouterLink to="/rooms">Комнаты</RouterLink>
+      <RouterLink to="/search">Поиск</RouterLink>
       <RouterLink to="/my">Мои брони</RouterLink>
     </nav>
     <span>{{ auth.user.full_name }}</span>
