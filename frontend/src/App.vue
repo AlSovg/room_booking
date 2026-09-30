@@ -1,3 +1,21 @@
+<script setup lang="ts">
+import { useRouter } from "vue-router";
+import { useAuth } from "@/stores/auth";
+
+const auth = useAuth();
+const router = useRouter();
+
+async function logout() {
+  await auth.logout();
+  router.push("/login");
+}
+</script>
+
 <template>
-  <main><h1>Бронирование переговорных</h1></main>
+  <header v-if="auth.user">
+    <nav><RouterLink to="/">Календарь</RouterLink></nav>
+    <span>{{ auth.user.full_name }}</span>
+    <button @click="logout">Выйти</button>
+  </header>
+  <main><RouterView /></main>
 </template>
