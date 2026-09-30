@@ -1,13 +1,22 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
 
 import pytest
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.models import Booking, Room, User
+from app.services import bookings
 from tests.conftest import ADMIN, EMPLOYEE, auth
 
 API = "/api/v1"
 MSK = "+03:00"
+# Середина рабочего дня: правила зависят от «сейчас», и ночью брони вокруг него выпадали из рабочих часов.
+NOW = datetime.combine(datetime.now(settings.tz).date(), time(12), settings.tz).astimezone(timezone.utc)
+
+
+@pytest.fixture(autouse=True)
+def fixed_now(monkeypatch):
+    monkeypatch.setattr(bookings, "_now", lambda: NOW)
 
 
 def slot(start: str, end: str, day: int = 15) -> dict:
@@ -103,7 +112,7 @@ def patch(client, h, booking_id, **body):
 def insert(db, room, user_email, start_delta_min, end_delta_min, title="Встреча"):
     """Бронь напрямую в БД, минуя правила: старт/конец — смещения от начала текущего 15-минутного слота."""
     from app.domain.rules import floor_step
-    base = floor_step(datetime.now(timezone.utc))
+    base = floor_step(bookings._now())  # в этом модуле — NOW, в остальных — реальное время
     user = db.scalar(select(User).where(User.email == user_email))
     b = Booking(room_id=room.id, organizer_id=user.id, title=title, attendees=2,
                 start_at=base + timedelta(minutes=start_delta_min), end_at=base + timedelta(minutes=end_delta_min))
