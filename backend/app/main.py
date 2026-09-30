@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import APIRouter, FastAPI
 
 from app import scheduler
-from app.api import auth, bookings, notifications, rooms, users
+from app.api import auth, bookings, notifications, rooms, stats, users
 from app.core.config import settings
 from app.core.errors import register_error_handlers
 
@@ -25,6 +25,7 @@ api.include_router(users.router)
 api.include_router(rooms.router)
 api.include_router(bookings.router)
 api.include_router(notifications.router)
+api.include_router(stats.router)
 
 
 @api.get("/health", tags=["health"])

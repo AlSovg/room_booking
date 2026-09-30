@@ -151,3 +151,35 @@ class NotificationOut(BaseModel):
 
 class UnreadCount(BaseModel):
     count: int
+
+
+class RoomStat(BaseModel):
+    room_id: int
+    name: str
+    bookings: int
+    booked_minutes: int
+    utilization: float  # занято / доступно (рабочие часы × дни периода)
+
+
+class PeakCell(BaseModel):
+    weekday: int  # ISO: 1 = понедельник
+    hour: int
+    bookings: int
+    booked_minutes: int
+
+
+class UserStat(BaseModel):
+    user_id: int
+    full_name: str
+    total: int
+    active: int
+    cancelled: int
+    hours: float
+    cancel_rate: float
+
+
+class StatsSummary(BaseModel):
+    total: int
+    cancelled: int
+    cancel_rate: float
+    avg_duration_minutes: float
