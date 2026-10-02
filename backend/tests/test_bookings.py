@@ -68,8 +68,11 @@ def test_adjacent_and_other_room_are_fine(client, db, room):
 @pytest.mark.parametrize("kw, code", [
     ({"start": "10:00", "end": "10:00"}, "INVALID_DURATION"),
     ({"start": "10:00", "end": "10:10"}, "INVALID_DURATION"),
+    ({"start": "10:00", "end": "10:05"}, "INVALID_DURATION"),        # AC-9: 5 минут
+    ({"start": "09:00", "end": "18:00"}, "INVALID_DURATION"),        # AC-9: 9 часов
     ({"start": "10:05", "end": "11:00"}, "NOT_ALIGNED"),
-    ({"start": "07:45", "end": "08:45"}, "OUTSIDE_WORKING_HOURS"),
+    ({"start": "07:45", "end": "08:45"}, "OUTSIDE_WORKING_HOURS"),   # AC-9
+    ({"start": "19:45", "end": "20:15"}, "OUTSIDE_WORKING_HOURS"),   # AC-9
     ({"start": "19:00", "end": "20:15"}, "OUTSIDE_WORKING_HOURS"),
     ({"attendees": 11}, "CAPACITY_EXCEEDED"),
 ])
