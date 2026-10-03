@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
 import Icon from "@/components/Icon.vue";
+import { confirmAction } from "@/utils/dialog";
 import { useAuth } from "@/stores/auth";
 
 type User = components["schemas"]["UserOut"];
@@ -33,7 +34,7 @@ const patch = async (u: User, body: components["schemas"]["UserUpdate"]) =>
   done((await api.PATCH("/api/v1/users/{user_id}", { params: { path: { user_id: u.id } }, body })).error);
 
 async function reset(u: User) {
-  if (!confirm(`Сбросить пароль ${u.email}?`)) return;
+  if (!(await confirmAction({ title: "Сбросить пароль?", text: `Для ${u.email} будет создан новый временный пароль, старый перестанет работать.`, confirm: "Сбросить" }))) return;
   const { data, error: e } = await api.POST("/api/v1/users/{user_id}/reset-password", { params: { path: { user_id: u.id } } });
   if (await done(e)) password.value = { email: u.email, value: data!.temporary_password };
 }

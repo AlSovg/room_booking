@@ -196,6 +196,7 @@ main.bare { padding: 0; }
 .modal-when { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .attendees { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 400; color: var(--muted); }
 .attendees .input { width: 96px; }
+.confirm-modal { width: 440px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 4px; }
 .alert-block { align-items: flex-start; gap: 12px; padding: 14px 16px; color: var(--ink); font-weight: 400; }
 .alert-block > div { display: flex; flex-direction: column; gap: 4px; }

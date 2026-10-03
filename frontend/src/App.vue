@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from "vue-router";
+import ConfirmDialog from "@/components/ConfirmDialog.vue";
 import Icon from "@/components/Icon.vue";
 import NotificationBell from "@/components/NotificationBell.vue";
 import UserMenu from "@/components/UserMenu.vue";
@@ -38,4 +39,5 @@ const isActive = (to: string) => route.path === to || (to !== "/" && route.path.
       <Icon :name="s.icon" :size="24" :stroke-width="isActive(s.to) ? 2.2 : 1.8" />{{ s.label }}
     </RouterLink>
   </nav>
+  <ConfirmDialog />
 </template>

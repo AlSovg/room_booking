@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
 import Icon from "@/components/Icon.vue";
+import { confirmAction, promptText } from "@/utils/dialog";
 import { equipmentIcon } from "@/icons-injection";
 import { plural } from "@/utils/time";
 
@@ -35,13 +36,14 @@ async function add() {
   if (await run(api.POST("/api/v1/equipment", { body: { name: name.value.trim() } }))) name.value = "";
 }
 
-const rename = (e: Equipment) => {
-  const n = prompt("Новое название", e.name)?.trim();
+const rename = async (e: Equipment) => {
+  const n = await promptText({ title: "Переименовать оборудование", confirm: "Сохранить", input: e.name });
   if (n && n !== e.name) run(api.PATCH("/api/v1/equipment/{equipment_id}", { params: { path: { equipment_id: e.id } }, body: { name: n } }));
 };
 
-const remove = (e: Equipment) =>
-  confirm(`Удалить «${e.name}»?`) && run(api.DELETE("/api/v1/equipment/{equipment_id}", { params: { path: { equipment_id: e.id } } }));
+const remove = async (e: Equipment) =>
+  (await confirmAction({ title: "Удалить оборудование?", text: `«${e.name}» будет удалено.`, confirm: "Удалить", danger: true })) &&
+  run(api.DELETE("/api/v1/equipment/{equipment_id}", { params: { path: { equipment_id: e.id } } }));
 
 const used = (e: Equipment) => {
   const n = usage.value.get(e.id);

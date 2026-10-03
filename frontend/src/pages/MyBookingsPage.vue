@@ -4,6 +4,7 @@ import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
 import BookingForm from "@/components/BookingForm.vue";
 import Icon from "@/components/Icon.vue";
+import { confirmAction } from "@/utils/dialog";
 import { dayTitle, hhmm, localParts, plural, todayLocal } from "@/utils/time";
 
 type Booking = components["schemas"]["BookingOut"];
@@ -32,7 +33,7 @@ watchEffect(async (onCleanup) => {
 });
 
 async function cancel(b: Booking) {
-  if (!confirm(`Отменить бронь «${b.title}»?`)) return;
+  if (!(await confirmAction({ title: "Отменить бронь?", text: `«${b.title}» будет отменена, комната освободится.`, confirm: "Отменить бронь", danger: true }))) return;
   const { error: e } = await api.POST("/api/v1/bookings/{booking_id}/cancel", { params: { path: { booking_id: b.id } } });
   if (e) error.value = errorMessage(e);
   else version.value++;
