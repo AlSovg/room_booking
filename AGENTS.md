@@ -21,7 +21,7 @@ frontend/           # SPA
 docker-compose.yml  # postgres
 docs/               # 01-requirements, 02-design, questions-for-author, 04-testing, 05-report
 PLAN.md             # план и прогресс — источник правды по статусу
-README.md           # запуск и пользовательская инструкция
+README.md, README.ru.md  # запуск (en/ru); инструкции — docs/user-guide(.ru).md
 ```
 
 ## Решения (не пересматривать без причины)

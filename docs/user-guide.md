@@ -1,109 +1,111 @@
-# Инструкция пользователя
+# User guide
 
-Приложение открывается в браузере (в Docker-сборке — http://localhost:8000). Аккаунты создаёт администратор; самостоятельной регистрации нет.
+**English** · [Русский](user-guide.ru.md)
 
-## 1. Вход и роли
+The app runs in a browser (http://localhost:8000 in the Docker setup). Accounts are created by an administrator; there is no self-registration. The interface is in Russian; button and section names below are given in English with the Russian label in parentheses where it helps.
 
-1. Откройте приложение и введите email и пароль, выданные администратором.
-2. После пяти неверных попыток подряд вход блокируется на 15 минут.
-3. Выйти можно из меню пользователя в правом верхнем углу.
+## 1. Signing in and roles
 
-| Роль | Возможности |
+1. Open the app and enter the email and password issued by your administrator.
+2. After five failed attempts in a row, sign-in is locked for 15 minutes.
+3. Sign out from the user menu in the top right corner.
+
+| Role | What you can do |
 |---|---|
-| Сотрудник | смотреть комнаты и календарь, искать свободные комнаты, создавать, менять и отменять **свои** брони, получать уведомления |
-| Администратор | всё то же, плюс управление комнатами, оборудованием и пользователями, статистика |
+| Employee | browse rooms and the calendar, search for free rooms, create, change and cancel **your own** bookings, receive notifications |
+| Administrator | everything above, plus managing rooms, equipment and users, and statistics |
 
-Разделы «Администрирование» и «Статистика» открываются из меню пользователя (только у администратора).
+"Administration" and "Statistics" are opened from the user menu (administrators only).
 
-## 2. Правила бронирования
+## 2. Booking rules
 
-- Рабочие часы — **08:00–20:00**, бронь целиком внутри одних суток.
-- Начало и конец кратны **15 минутам**; длительность от 15 минут до 8 часов.
-- Бронь в прошлом создать нельзя.
-- Число участников — от 1 до вместимости комнаты.
-- Брони встык (10:00–11:00 и 11:00–12:00) не конфликтуют.
-- В одной комнате не может быть двух пересекающихся броней. Если слот занят, приложение покажет, кем и на какое время.
-- Начавшуюся бронь можно только сократить (уменьшить время конца) или отменить; закончившуюся изменить и отменить нельзя.
-- Неактивную комнату забронировать нельзя.
+- Working hours are **08:00–20:00**; a booking must fit within a single day.
+- Start and end are multiples of **15 minutes**; duration is from 15 minutes to 8 hours.
+- You cannot book in the past.
+- Attendees: from 1 up to the room capacity.
+- Back-to-back bookings (10:00–11:00 and 11:00–12:00) do not conflict.
+- A room cannot have two overlapping bookings. If a slot is taken, the app shows who holds it and when.
+- A booking that has started can only be shortened (earlier end) or cancelled; a finished booking cannot be changed or cancelled.
+- An inactive room cannot be booked.
 
-## 3. Календарь и бронирование
+## 3. Calendar and booking
 
-Главная страница — календарь «комнаты × время» на выбранный день.
+The home page is a "rooms × time" calendar for the selected day.
 
-1. Стрелками и кнопкой «Сегодня» переключайте дни. Фильтр «от N человек» оставляет подходящие по вместимости комнаты.
-2. Выберите комнату в чипах над сеткой.
-3. Нажмите на свободное время в сетке или протяните выделение на нужный интервал. Либо нажмите кнопку «+» («Новая бронь»).
-4. В открывшейся форме проверьте дату, начало, конец и комнату, введите тему и число участников, нажмите «Забронировать».
+1. Use the arrows and "Today" to switch days. The "from N people" filter keeps rooms with enough capacity.
+2. Pick a room with the chips above the grid.
+3. Click free time in the grid, or drag to select the interval. Alternatively use the "+" ("New booking") button.
+4. In the form, check date, start, end and room, enter a title and the number of attendees, and press "Book" ("Забронировать").
 
-Цвета в календаре: свои брони, чужие брони, прошедшее время. Линия отмечает текущий момент.
+Calendar colours distinguish your bookings, other people's bookings and past time. A line marks the current moment.
 
-**Если время занято**, форма покажет сообщение «Это время уже занято» с названием, временем и организатором конфликтующей брони. По ссылке «Показать в календаре» можно перейти к этому дню; либо выберите другое время.
+**If the time is taken**, the form shows "This time is already taken" with the title, time and organiser of the conflicting booking. The "Show in calendar" link jumps to that day; or pick another time.
 
-## 4. Комнаты
+## 4. Rooms
 
-Раздел «Комнаты» — карточки с вместимостью, оборудованием и текущим статусом («Занята до…» / «Свободна до…»).
+The "Rooms" section shows cards with capacity, equipment and current status ("Busy until…" / "Free until…").
 
-- Фильтруйте по минимальной вместимости и оборудованию (чипы можно сочетать).
-- Кнопка «Расписание» открывает страницу комнаты: недельная сетка, переход по неделям и к конкретной дате. На телефоне показывается один день, дни переключаются полосой над сеткой.
-- Бронь можно создать и отсюда: выделите время в сетке или нажмите «Забронировать».
+- Filter by minimum capacity and equipment (chips can be combined).
+- "Schedule" opens the room page: a weekly grid, navigation by week and by date. On a phone one day is shown, and days are switched with the strip above the grid.
+- You can also book from here: select time in the grid or press "Book".
 
-## 5. Поиск свободной комнаты
+## 5. Searching for a free room
 
-Раздел «Поиск»: укажите дату, время «С» и «До», число участников и, при необходимости, нужное оборудование — нажмите «Найти».
+"Search" section: enter the date, "From" and "To" times, the number of attendees and, if needed, the required equipment, then press "Find".
 
-- В результатах показаны свободные комнаты с полосой занятости на день: ваш интервал, занятое время и текущий момент.
-- Кнопка «Забронировать» у комнаты открывает форму брони с уже подставленным временем.
-- Если подходящих комнат нет, измените время, уменьшите число участников или уберите оборудование.
+- Results list free rooms with a day timeline: your interval, busy periods and the current moment.
+- "Book" next to a room opens the booking form with the time pre-filled.
+- If nothing fits, change the time, reduce the number of attendees or drop equipment requirements.
 
-## 6. Мои брони
+## 6. My bookings
 
-Раздел «Мои брони» — три вкладки: «Предстоящие», «Прошедшие», «Отменённые». Брони сгруппированы по дням.
+"My bookings" has three tabs: "Upcoming", "Past", "Cancelled". Bookings are grouped by day.
 
-- **Изменить** — меняет время, комнату, тему или число участников; проверка на пересечения выполняется заново.
-- **Отменить** (кнопка с корзиной) — после подтверждения в окне бронь переходит в «Отменённые», слот освобождается. Отменённые брони остаются в истории и отчётах.
-- Для брони, которая начнётся в ближайший час, показывается «через N мин».
+- **Edit** changes time, room, title or attendees; overlap checks run again.
+- **Cancel** (trash button) asks for confirmation in a dialog, then moves the booking to "Cancelled" and frees the slot. Cancelled bookings stay in history and reports.
+- A booking starting within the next hour shows "in N min".
 
-## 7. Уведомления
+## 7. Notifications
 
-Колокольчик в шапке показывает число непрочитанных (обновляется раз в 30 секунд).
+The bell in the header shows the unread count (refreshed every 30 seconds).
 
-| Уведомление | Когда приходит |
+| Notification | When it arrives |
 |---|---|
-| «Скоро начнётся» | за 15 минут до начала вашей брони |
-| «Бронь изменена» | вашу бронь изменил другой пользователь (администратор) |
-| «Бронь отменена» | вашу бронь отменил другой пользователь (администратор) |
+| "Starting soon" | 15 minutes before your booking starts |
+| "Booking changed" | another user (an administrator) changed your booking |
+| "Booking cancelled" | another user (an administrator) cancelled your booking |
 
-Нажатие на уведомление отмечает его прочитанным, «Прочитать все» — все сразу. О собственных действиях уведомления не создаются.
+Clicking a notification marks it read; "Mark all read" marks everything. Your own actions do not create notifications.
 
-## 8. Администрирование (только администратор)
+## 8. Administration (administrators only)
 
-Меню пользователя → «Администрирование». Три вкладки:
+User menu → "Administration". Three tabs:
 
-**Комнаты.** «Добавить комнату» — название, местоположение, вместимость, оборудование. Карандаш — изменить. Комнаты не удаляются: неактивная комната скрывается из календаря и поиска, но история броней сохраняется.
+**Rooms.** "Add room": name, location, capacity, equipment. The pencil edits a room. Rooms are never deleted: an inactive room is hidden from the calendar and search, while its booking history is kept.
 
-**Оборудование.** Добавление, переименование и удаление (с подтверждением в окне). Оборудование, назначенное комнатам, удалить нельзя — сначала уберите его из комнат (приложение покажет сообщение об ошибке).
+**Equipment.** Add, rename and delete (with a confirmation dialog). Equipment assigned to rooms cannot be deleted; remove it from the rooms first (the app shows an error message).
 
-**Пользователи.**
-- Создание: ФИО, email, роль. После создания показывается **временный пароль — только один раз**, скопируйте его и передайте пользователю.
-- Щит — сменить роль (сотрудник / администратор); ключ — сбросить пароль (после подтверждения, новый временный пароль показывается один раз); значок блокировки — заблокировать или разблокировать.
-- Заблокированный пользователь не может войти; его будущие брони остаются.
-- Себя заблокировать или разжаловать нельзя (в строке написано «это вы»).
+**Users.**
+- Create: full name, email, role. A **temporary password is shown once** after creation: copy it and pass it to the user.
+- Shield — change role (employee / administrator); key — reset password (after confirmation; the new temporary password is shown once); lock icon — block or unblock.
+- A blocked user cannot sign in; their future bookings stay.
+- You cannot block or demote yourself (the row says "this is you").
 
-## 9. Статистика (только администратор)
+## 9. Statistics (administrators only)
 
-Меню пользователя → «Статистика». Период выбирается пресетами или полями «С» / «По».
+User menu → "Statistics". Choose the period with presets or the "From" / "To" fields.
 
-- **Сводка:** число броней, отменённые и их доля, средняя длительность, суммарно забронированные часы.
-- **Загрузка комнат:** доля занятого рабочего времени по каждой комнате.
-- **Пиковые часы:** тепловая карта «день недели × час».
-- **Пользователи:** число броней и отмен по сотрудникам.
+- **Summary:** number of bookings, cancelled ones and their share, average duration, total booked hours.
+- **Room utilisation:** share of working time booked, per room.
+- **Peak hours:** a "weekday × hour" heat map.
+- **Users:** bookings and cancellations per employee.
 
-Каждый блок можно выгрузить в CSV кнопкой «CSV».
+Each block can be exported with its "CSV" button.
 
-## 10. Частые вопросы
+## 10. FAQ
 
-- **Не могу забронировать — «время занято».** Выберите другое время или другую комнату; ссылка «Показать в календаре» ведёт к конфликтующей брони.
-- **Нужная комната не показывается.** Комната неактивна, либо не проходит фильтр по вместимости или оборудованию.
-- **Бронь не удаётся изменить.** Она уже закончилась, либо начавшуюся бронь пытаются удлинить (разрешено только сокращение), либо она не ваша.
-- **Забыл пароль.** Обратитесь к администратору: он сбросит пароль и выдаст временный.
-- **Бронь вне рабочих часов не создаётся.** Допустимо только 08:00–20:00 в часовом поясе организации.
+- **I cannot book: "time is taken".** Pick another time or room; "Show in calendar" leads to the conflicting booking.
+- **A room is missing.** It is inactive, or filtered out by capacity or equipment.
+- **I cannot edit a booking.** It has already finished, or you are trying to extend one that has started (only shortening is allowed), or it is not yours.
+- **Forgot my password.** Ask an administrator to reset it and issue a temporary one.
+- **A booking outside working hours is rejected.** Only 08:00–20:00 in the organisation's time zone is allowed.

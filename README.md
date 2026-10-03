@@ -1,86 +1,90 @@
-# Бронирование переговорных комнат
+# Meeting Room Booking
 
-Веб-приложение для бронирования переговорных: список комнат, создание, изменение и отмена броней, календарь занятости, поиск свободных комнат, уведомления и отчёты по использованию. Пересечение встреч в одной комнате исключено на уровне БД (exclusion-констрейнт PostgreSQL), поэтому параллельные запросы не могут занять один слот.
+**English** · [Русский](README.ru.md)
 
-Как пользоваться приложением — в [docs/user-guide.md](docs/user-guide.md).
+A web app for booking meeting rooms: room list, creating, changing and cancelling bookings, an occupancy calendar, free-room search, notifications and usage reports. Overlapping bookings in the same room are ruled out at the database level (a PostgreSQL exclusion constraint), so concurrent requests can never take the same slot.
 
-## Стек
+How to use the app: [docs/user-guide.md](docs/user-guide.md) ([Русская версия](docs/user-guide.ru.md)).
+
+> The UI, the seed data and most project documents are in Russian.
+
+## Stack
 
 - Backend: Python 3.12, FastAPI, SQLAlchemy 2, Alembic, pytest
 - Frontend: Vue 3, Vite, TypeScript, Vitest
-- БД: PostgreSQL 16
+- Database: PostgreSQL 16
 
-## Быстрый старт (Docker)
+## Quick start (Docker)
 
 ```bash
 docker compose up -d --build
 ```
 
-Приложение откроется на http://localhost:8000 (фронт и API в одном контейнере, Swagger — `/docs`). Postgres — отдельный контейнер `db`. Миграции и сид выполняются при старте.
+The app is served at http://localhost:8000 (frontend and API in one container, Swagger at `/docs`). PostgreSQL runs in a separate `db` container. Migrations and seeding run on startup.
 
-| Пользователь | Email | Пароль | Роль |
+| User | Email | Password | Role |
 |---|---|---|---|
-| Администратор | `admin@example.com` | `admin12345` | admin |
-| Иван Петров | `ivan@example.com` | `employee123` | employee |
-| Мария Сидорова | `maria@example.com` | `employee123` | employee |
+| Administrator | `admin@example.com` | `admin12345` | admin |
+| Ivan Petrov | `ivan@example.com` | `employee123` | employee |
+| Maria Sidorova | `maria@example.com` | `employee123` | employee |
 
-Остановить: `docker compose down` (данные сохраняются в томе `pgdata`; `docker compose down -v` удалит и их).
+Stop: `docker compose down` (data stays in the `pgdata` volume; `docker compose down -v` removes it too).
 
-### Настройки
+### Configuration
 
-Задаются переменными окружения (в `docker-compose.yml` — для сервиса `app`, локально — в `backend/.env`):
+Set via environment variables (in `docker-compose.yml` for the `app` service, in `backend/.env` for local runs):
 
-| Переменная | По умолчанию | Назначение |
+| Variable | Default | Purpose |
 |---|---|---|
-| `DATABASE_URL` | `postgresql+psycopg://booking:booking@localhost:5433/booking` | подключение к БД |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `admin@example.com`, `admin12345` | администратор, создаваемый сидом |
-| `JWT_SECRET` | dev-значение | **обязательно заменить вне разработки** |
-| `COOKIE_SECURE` | `false` | `true` при работе через HTTPS |
-| `ORG_TIMEZONE` | `Europe/Moscow` | зона для рабочих часов 08:00–20:00 |
-| `SCHEDULER_ENABLED` | `true` | планировщик напоминаний |
+| `DATABASE_URL` | `postgresql+psycopg://booking:booking@localhost:5433/booking` | database connection |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | `admin@example.com`, `admin12345` | administrator created by the seed |
+| `JWT_SECRET` | development value | **must be replaced outside development** |
+| `COOKIE_SECURE` | `false` | set to `true` when served over HTTPS |
+| `ORG_TIMEZONE` | `Europe/Moscow` | time zone for working hours 08:00–20:00 |
+| `SCHEDULER_ENABLED` | `true` | reminder scheduler |
 
-Сид создаёт демонстрационных сотрудников с паролем `employee123` — в боевой среде их нужно удалить или сменить пароли.
+The seed creates demo employees with the password `employee123`; remove them or change their passwords in a real deployment.
 
-## Разработка
+## Development
 
-Postgres в Docker, бэкенд и фронтенд — локально (hot reload):
+PostgreSQL in Docker, backend and frontend run locally (hot reload):
 
 ```bash
-docker compose up -d db                      # Postgres на localhost:5433
+docker compose up -d db                      # PostgreSQL on localhost:5433
 
 cd backend
 python -m venv .venv && .venv/Scripts/python -m pip install -e ".[dev]"
 cp .env.example .env
-.venv/Scripts/alembic upgrade head           # миграции
-.venv/Scripts/python -m app.seed             # сид (идемпотентный)
-.venv/Scripts/uvicorn app.main:app --reload  # API на :8000
+.venv/Scripts/alembic upgrade head           # migrations
+.venv/Scripts/python -m app.seed             # seed (idempotent)
+.venv/Scripts/uvicorn app.main:app --reload  # API on :8000
 
 cd frontend
 npm install
-npm run dev                                  # Vite, /api проксируется на :8000
+npm run dev                                  # Vite, /api is proxied to :8000
 ```
 
-На Linux/macOS вместо `.venv/Scripts/` используйте `.venv/bin/`. Контейнер `app` при этом нужно остановить (он занимает порт 8000): `docker compose stop app`.
+On Linux/macOS use `.venv/bin/` instead of `.venv/Scripts/`. Stop the `app` container first (it occupies port 8000): `docker compose stop app`.
 
-После изменений API типы фронта обновляются командой `npm run gen:api` (OpenAPI → `src/api/schema.d.ts`).
+After API changes, regenerate the frontend types with `npm run gen:api` (OpenAPI → `src/api/schema.d.ts`).
 
-## Тесты
+## Tests
 
 ```bash
 docker compose up -d db
-cd backend && .venv/Scripts/python -m pytest   # нужен запущенный Postgres
+cd backend && .venv/Scripts/python -m pytest   # needs a running PostgreSQL
 cd frontend && npm test                        # Vitest
-npm run build                                  # проверка типов и сборка
+npm run build                                  # type check and build
 ```
 
-Тесты бэкенда используют отдельную базу `<имя>_test`, она создаётся и мигрируется автоматически. Подробности и результаты прогона критериев приёмки — в [docs/04-testing.md](docs/04-testing.md).
+Backend tests use a separate `<name>_test` database, created and migrated automatically. Details and acceptance-criteria results: [docs/04-testing.md](docs/04-testing.md) (in Russian).
 
-## Документация
+## Documentation
 
-- [docs/user-guide.md](docs/user-guide.md) — инструкция пользователя
-- [docs/01-requirements.md](docs/01-requirements.md) — требования
-- [docs/02-design.md](docs/02-design.md) — проектирование (архитектура, модель данных, API, ADR)
-- [docs/04-testing.md](docs/04-testing.md) — тестирование
-- [docs/05-report/report.md](docs/05-report/report.md) — отчёт
-- [PLAN.md](PLAN.md) — план и прогресс
-- [AGENTS.md](AGENTS.md) — контекст и решения для AI-агентов
+- [docs/user-guide.md](docs/user-guide.md) — user guide ([Русский](docs/user-guide.ru.md))
+- [docs/01-requirements.md](docs/01-requirements.md) — requirements (ru)
+- [docs/02-design.md](docs/02-design.md) — design: architecture, data model, API, ADRs (ru)
+- [docs/04-testing.md](docs/04-testing.md) — testing (ru)
+- [docs/05-report/report.md](docs/05-report/report.md) — report (ru)
+- [PLAN.md](PLAN.md) — plan and progress (ru)
+- [AGENTS.md](AGENTS.md) — context and decisions for AI agents (ru)
