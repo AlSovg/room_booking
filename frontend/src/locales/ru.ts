@@ -1,3 +1,4 @@
+// Тексты ошибок API — по коду (errors.<CODE>), параметры берутся из error.details
 // Формы множественного числа: «один | несколько | много» (правило ruPlural в i18n.ts)
 export default {
   app: { title: "Бронирование переговорных", name: "Переговорные" },
@@ -51,6 +52,11 @@ export default {
     ariaUnread: "Уведомления, {n} непрочитанных", title: "Уведомления", new: "{n} новых", readAll: "Прочитать все",
     none: "Уведомлений нет", unread: "Не прочитано",
     kind: { reminder: "Скоро начнётся", changed: "Бронь изменена", cancelled: "Бронь отменена" },
+    msg: {
+      reminder: "{title}, {room}, {time}",
+      changed: "Бронь «{title}» изменена ({actor}): {room}, {when}",
+      cancelled: "Бронь «{title}» отменена ({actor}): {room}, {when}",
+    },
   },
   admin: { equipment: "Оборудование", users: "Пользователи", addRoom: "Добавить комнату", sections: "Разделы администрирования" },
   equip: {
@@ -78,7 +84,32 @@ export default {
     justNow: "только что", minAgo: "{n} мин назад", today: "сегодня", yesterday: "вчера",
     todayCap: "Сегодня", tomorrow: "Завтра", yesterdayCap: "Вчера",
   },
-  errors: { request: "Не удалось выполнить запрос" },
+  errors: {
+    request: "Не удалось выполнить запрос",
+    UNAUTHENTICATED: "Требуется вход",
+    INVALID_CREDENTIALS: "Неверный email или пароль",
+    TOO_MANY_ATTEMPTS: "Слишком много попыток входа, повторите позже",
+    ACCOUNT_DISABLED: "Пользователь заблокирован",
+    FORBIDDEN: "Недостаточно прав",
+    NOT_FOUND: "Не найдено",
+    BOOKING_CONFLICT: "Комната занята в это время",
+    BOOKING_CANCELLED: "Бронь отменена",
+    VALIDATION_ERROR: "Некорректные данные",
+    INVALID_DURATION: "Начало должно быть раньше конца, длительность — от 15 минут до 8 часов",
+    NOT_ALIGNED: "Начало и конец должны быть кратны 15 минутам",
+    OUTSIDE_WORKING_HOURS: "Бронирование возможно с {from} до {to}, в пределах одних суток",
+    BOOKING_IN_PAST: "Нельзя бронировать в прошлом",
+    CAPACITY_EXCEEDED: "Участников должно быть от 1 до {capacity}",
+    ROOM_INACTIVE: "Комната отключена",
+    BOOKING_FINISHED: "Бронь уже закончилась",
+    BOOKING_STARTED: "Начавшуюся бронь можно только сократить или отменить",
+    ROOM_NAME_TAKEN: "Комната с таким названием уже есть",
+    EQUIPMENT_NAME_TAKEN: "Такое оборудование уже есть",
+    EQUIPMENT_IN_USE: "Оборудование используется в комнатах",
+    EMAIL_TAKEN: "Пользователь с таким email уже есть",
+    SELF_LOCKOUT: "Нельзя заблокировать или разжаловать себя",
+    WRONG_PASSWORD: "Текущий пароль неверен",
+  },
   plural: {
     freeRooms: "Свободна {n} комната | Свободны {n} комнаты | Свободны {n} комнат",
     fromPeople: "от {n} человека | от {n} человек | от {n} человек",

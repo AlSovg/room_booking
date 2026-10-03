@@ -8,9 +8,9 @@ MAX_DURATION = timedelta(hours=8)
 
 
 class RuleViolation(Exception):
-    def __init__(self, code: str, message: str):
+    def __init__(self, code: str, message: str, details: dict | None = None):
         super().__init__(message)
-        self.code, self.message = code, message
+        self.code, self.message, self.details = code, message, details
 
 
 def overlaps(a_start: datetime, a_end: datetime, b_start: datetime, b_end: datetime) -> bool:
@@ -32,10 +32,11 @@ def check_interval(start: datetime, end: datetime, tz: ZoneInfo, work_start: tim
         raise RuleViolation("NOT_ALIGNED", "Начало и конец должны быть кратны 15 минутам")
     s, e = start.astimezone(tz), end.astimezone(tz)
     if s.date() != e.date():
-        raise RuleViolation("OUTSIDE_WORKING_HOURS", "Бронь должна укладываться в одни сутки")
+        raise RuleViolation("OUTSIDE_WORKING_HOURS", "Бронь должна укладываться в одни сутки", {"from": f"{work_start:%H:%M}", "to": f"{work_end:%H:%M}"})
     if s.time() < work_start or e.time() > work_end:
         raise RuleViolation("OUTSIDE_WORKING_HOURS",
-                            f"Бронирование возможно с {work_start:%H:%M} до {work_end:%H:%M}")
+                            f"Бронирование возможно с {work_start:%H:%M} до {work_end:%H:%M}",
+                            {"from": f"{work_start:%H:%M}", "to": f"{work_end:%H:%M}"})
 
 
 def check_not_past(start: datetime, now: datetime) -> None:
@@ -47,7 +48,7 @@ def check_not_past(start: datetime, now: datetime) -> None:
 def check_capacity(attendees: int, capacity: int) -> None:
     """BR-6."""
     if not 1 <= attendees <= capacity:
-        raise RuleViolation("CAPACITY_EXCEEDED", f"Участников должно быть от 1 до {capacity}")
+        raise RuleViolation("CAPACITY_EXCEEDED", f"Участников должно быть от 1 до {capacity}", {"capacity": capacity})
 
 
 def check_room_active(is_active: bool) -> None:

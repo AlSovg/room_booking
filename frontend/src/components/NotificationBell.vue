@@ -5,10 +5,24 @@ import type { components } from "@/api/schema";
 import Icon from "@/components/Icon.vue";
 import type { IconName } from "@/icons-injection";
 import { useDismiss } from "@/utils/dismiss";
-import { ago } from "@/utils/time";
+import { t } from "@/i18n";
+import { ago, dateFmt, hhmm, localParts } from "@/utils/time";
 
 type Kind = components["schemas"]["NotificationType"];
 const KINDS: Record<Kind, IconName> = { reminder: "Clock", changed: "Pencil", cancelled: "CircleX" };
+
+type Notif = components["schemas"]["NotificationOut"];
+
+/** Текст из params на языке интерфейса; у старых записей без params — сохранённый русский message. */
+function text(n: Notif): string {
+  const p = n.params as Record<string, string> | null;
+  if (!p) return n.message;
+  const s = localParts(new Date(p.start));
+  const time = hhmm(s.minutes);
+  const day = dateFmt({ day: "2-digit", month: "2-digit", timeZone: "UTC" }).format(new Date(`${s.date}T00:00:00Z`));
+  const when = p.end ? `${day} ${time}–${hhmm(localParts(new Date(p.end)).minutes)}` : time;
+  return t(`notif.msg.${n.type}`, { ...p, time, when });
+}
 
 const POLL = 30_000; // решение 8: опрос раз в 30 с
 const count = ref(0);
@@ -76,7 +90,7 @@ onBeforeUnmount(() => clearInterval(timer));
             <span class="kind" :class="n.type"><Icon :name="KINDS[n.type]" :size="18" /></span>
             <span class="body">
               <span class="row"><b>{{ $t(`notif.kind.${n.type}`) }}</b><small>{{ ago(n.created_at) }}</small></span>
-              <span class="text">{{ n.message }}</span>
+              <span class="text">{{ text(n) }}</span>
             </span>
             <span v-if="!n.is_read" class="dot" :aria-label="$t('notif.unread')" />
           </button>

@@ -145,6 +145,7 @@ class NotificationOut(BaseModel):
     type: NotificationType
     booking_id: int | None
     message: str
+    params: dict | None = None
     is_read: bool
     created_at: datetime
 

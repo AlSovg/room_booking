@@ -1,4 +1,3 @@
-// Ошибки API (errors) переведены только здесь: в русской локали показывается сообщение сервера (оно содержит детали вроде вместимости)
 export default {
   app: { title: "Meeting room booking", name: "Meeting rooms" },
   lang: { switch: "Switch language" },
@@ -51,6 +50,11 @@ export default {
     ariaUnread: "Notifications, {n} unread", title: "Notifications", new: "{n} new", readAll: "Mark all read",
     none: "No notifications", unread: "Unread",
     kind: { reminder: "Starting soon", changed: "Booking changed", cancelled: "Booking cancelled" },
+    msg: {
+      reminder: "{title}, {room}, {time}",
+      changed: "Booking “{title}” was changed by {actor}: {room}, {when}",
+      cancelled: "Booking “{title}” was cancelled by {actor}: {room}, {when}",
+    },
   },
   admin: { equipment: "Equipment", users: "Users", addRoom: "Add room", sections: "Administration sections" },
   equip: {
@@ -99,9 +103,9 @@ export default {
     VALIDATION_ERROR: "Invalid data",
     INVALID_DURATION: "Start must be before end; duration is 15 minutes to 8 hours",
     NOT_ALIGNED: "Start and end must be multiples of 15 minutes",
-    OUTSIDE_WORKING_HOURS: "The booking must fit within the working hours of a single day",
+    OUTSIDE_WORKING_HOURS: "Bookings are available from {from} to {to}, within a single day",
     BOOKING_IN_PAST: "You cannot book in the past",
-    CAPACITY_EXCEEDED: "The number of attendees exceeds the room capacity",
+    CAPACITY_EXCEEDED: "Attendees must be between 1 and {capacity}",
     ROOM_INACTIVE: "The room is disabled",
     BOOKING_FINISHED: "The booking has already ended",
     BOOKING_STARTED: "A booking that has started can only be shortened or cancelled",

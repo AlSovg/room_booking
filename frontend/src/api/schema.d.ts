@@ -555,6 +555,10 @@ export interface components {
             booking_id: number | null;
             /** Message */
             message: string;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            } | null;
             /** Is Read */
             is_read: boolean;
             /**

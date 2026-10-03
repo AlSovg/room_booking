@@ -24,7 +24,7 @@ def register_error_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RuleViolation)
     async def _rule(_: Request, e: RuleViolation):
-        return JSONResponse(_body(e.code, e.message), 422)
+        return JSONResponse(_body(e.code, e.message, e.details), 422)
 
     @app.exception_handler(RequestValidationError)
     async def _validation(_: Request, e: RequestValidationError):

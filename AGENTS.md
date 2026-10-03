@@ -44,6 +44,7 @@ README.md, README.ru.md  # setup (en/ru)
 - Do not hand-write frontend API types — generate them from OpenAPI.
 - Do not add a dependency for something a few lines can do.
 - UI strings live in `frontend/src/locales/{ru,en}.ts`; do not hardcode text in components.
+- API errors are translated on the frontend by `error.code` (`errors.<CODE>`, params from `error.details`); notifications store `params` and are rendered from `notif.msg.*`. The Russian `message` fields are only a fallback.
 
 ## Commands
 

@@ -6,7 +6,7 @@ from sqlalchemy import (
     BigInteger, Boolean, CheckConstraint, DateTime, Enum, ForeignKey, Identity,
     Index, Integer, Text, func, text,
 )
-from sqlalchemy.dialects.postgresql import ExcludeConstraint, UUID
+from sqlalchemy.dialects.postgresql import JSONB, ExcludeConstraint, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 TZ = DateTime(timezone=True)  # всегда timestamptz, иначе SQLAlchemy создаст WITHOUT TIME ZONE
@@ -132,7 +132,8 @@ class Notification(Base):
     user_id: Mapped[int] = mapped_column(ID, ForeignKey("users.id", ondelete="CASCADE"))
     type: Mapped[NotificationType] = mapped_column(Enum(NotificationType, name="notification_type"))
     booking_id: Mapped[int | None] = mapped_column(ID, ForeignKey("bookings.id", ondelete="SET NULL"))
-    message: Mapped[str] = mapped_column(Text)
+    message: Mapped[str] = mapped_column(Text)  # русский текст — запасной вариант; интерфейс собирает его из params
+    params: Mapped[dict | None] = mapped_column(JSONB)
     dedupe_key: Mapped[str | None] = mapped_column(Text, unique=True)
     is_read: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
     created_at: Mapped[datetime] = mapped_column(TZ, server_default=func.now())

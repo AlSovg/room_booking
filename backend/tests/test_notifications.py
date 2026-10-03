@@ -21,6 +21,7 @@ def test_changed_and_cancelled_by_admin_notify_owner_but_own_actions_do_not(clie
     client.post(f"{API}/bookings/{b['id']}/cancel", headers=adm)
     got = mine(client, emp)
     assert [n["type"] for n in got] == ["cancelled", "changed"] and "Волга" in got[0]["message"]
+    assert got[0]["params"]["room"] and got[0]["params"]["actor"] and got[0]["params"]["start"]
     assert mine(client, adm) == []
 
     assert client.get(f"{API}/notifications/unread-count", headers=emp).json() == {"count": 2}

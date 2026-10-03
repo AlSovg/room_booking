@@ -6,10 +6,11 @@ from app.core.errors import AppError
 from app.models import Booking, Notification, NotificationType, Room, User
 
 REMINDER_SQL = text("""
-INSERT INTO notifications (user_id, type, booking_id, message, dedupe_key)
+INSERT INTO notifications (user_id, type, booking_id, message, params, dedupe_key)
 SELECT b.organizer_id, 'reminder', b.id,
        'Скоро начнётся: ' || b.title || ', ' || r.name || ', ' ||
        to_char(b.start_at AT TIME ZONE :tz, 'HH24:MI'),
+       jsonb_build_object('title', b.title, 'room', r.name, 'start', b.start_at),
        'reminder:' || b.id || ':' || CAST(extract(epoch FROM b.start_at) AS bigint)
 FROM bookings b JOIN rooms r ON r.id = b.room_id
 WHERE b.status = 'active' AND b.start_at > now() AND b.start_at <= now() + interval '15 minutes'
@@ -25,7 +26,9 @@ def notify_organizer(db: Session, actor: User, b: Booking, kind: NotificationTyp
     when = f"{b.start_at.astimezone(settings.tz):%d.%m %H:%M}–{b.end_at.astimezone(settings.tz):%H:%M}"
     verb = "изменена" if kind == NotificationType.changed else "отменена"
     db.add(Notification(user_id=b.organizer_id, type=kind, booking_id=b.id,
-                        message=f"Бронь «{b.title}» {verb} ({actor.full_name}): {room.name}, {when}"))
+                        message=f"Бронь «{b.title}» {verb} ({actor.full_name}): {room.name}, {when}",
+                        params={"title": b.title, "actor": actor.full_name, "room": room.name,
+                                "start": b.start_at.isoformat(), "end": b.end_at.isoformat()}))
 
 
 def remind_due(db: Session) -> int:

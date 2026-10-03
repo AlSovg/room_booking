@@ -48,10 +48,10 @@ const authMiddleware: Middleware = {
 };
 api.use(authMiddleware);
 
-/** Текст ошибки: перевод по коду (если он есть для языка), иначе сообщение сервера (оно на русском). */
+/** Текст ошибки: перевод по коду с параметрами из details, иначе сообщение сервера (оно на русском). */
 export function errorMessage(e: unknown): string {
-  const err = (e as { error?: { code?: string; message?: string } } | undefined)?.error;
+  const err = (e as { error?: { code?: string; message?: string; details?: Record<string, unknown> } } | undefined)?.error;
   const { t, te } = i18n.global;
-  if (err?.code && te(`errors.${err.code}`)) return t(`errors.${err.code}`);
+  if (err?.code && te(`errors.${err.code}`)) return t(`errors.${err.code}`, err.details ?? {});
   return err?.message ?? t("errors.request");
 }
