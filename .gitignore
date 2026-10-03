@@ -1,0 +1,10 @@
+.claude/
+.idea/
+.vscode/
+*.log
+.DS_Store
+
+# docs: в репозитории только инструкции пользователя
+docs/*
+!docs/user-guide.md
+!docs/user-guide.ru.md

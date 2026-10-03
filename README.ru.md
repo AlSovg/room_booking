@@ -75,14 +75,10 @@ cd frontend && npm test                        # Vitest
 npm run build                                  # проверка типов и сборка
 ```
 
-Тесты бэкенда используют отдельную базу `<имя>_test`, она создаётся и мигрируется автоматически. Подробности и результаты прогона критериев приёмки — в [docs/04-testing.md](docs/04-testing.md).
+Тесты бэкенда используют отдельную базу `<имя>_test`, она создаётся и мигрируется автоматически.
 
 ## Документация
 
 - [docs/user-guide.ru.md](docs/user-guide.ru.md) — инструкция пользователя ([English](docs/user-guide.md))
-- [docs/01-requirements.md](docs/01-requirements.md) — требования
-- [docs/02-design.md](docs/02-design.md) — проектирование (архитектура, модель данных, API, ADR)
-- [docs/04-testing.md](docs/04-testing.md) — тестирование
-- [docs/05-report/report.md](docs/05-report/report.md) — отчёт
 - [PLAN.md](PLAN.md) — план и прогресс
 - [AGENTS.md](AGENTS.md) — контекст и решения для AI-агентов

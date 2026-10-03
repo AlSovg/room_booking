@@ -77,14 +77,10 @@ cd frontend && npm test                        # Vitest
 npm run build                                  # type check and build
 ```
 
-Backend tests use a separate `<name>_test` database, created and migrated automatically. Details and acceptance-criteria results: [docs/04-testing.md](docs/04-testing.md) (in Russian).
+Backend tests use a separate `<name>_test` database, created and migrated automatically.
 
 ## Documentation
 
 - [docs/user-guide.md](docs/user-guide.md) — user guide ([Русский](docs/user-guide.ru.md))
-- [docs/01-requirements.md](docs/01-requirements.md) — requirements (ru)
-- [docs/02-design.md](docs/02-design.md) — design: architecture, data model, API, ADRs (ru)
-- [docs/04-testing.md](docs/04-testing.md) — testing (ru)
-- [docs/05-report/report.md](docs/05-report/report.md) — report (ru)
 - [PLAN.md](PLAN.md) — plan and progress (ru)
 - [AGENTS.md](AGENTS.md) — context and decisions for AI agents (ru)
