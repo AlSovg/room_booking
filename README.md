@@ -82,4 +82,4 @@ Backend tests use a separate `<name>_test` database, created and migrated automa
 ## Documentation
 
 - [docs/user-guide.md](docs/user-guide.md) — user guide ([Русский](docs/user-guide.ru.md))
-- [AGENTS.md](AGENTS.md) — context and decisions for AI agents (ru)
+- [AGENTS.md](AGENTS.md) — context and decisions for AI agents
