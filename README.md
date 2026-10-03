@@ -21,7 +21,11 @@
 
 ## Запуск
 
-Будет описан после создания каркаса.
+```
+docker compose up -d --build
+```
+
+Приложение (фронт + API в одном контейнере) — http://localhost:8000, Postgres — отдельный контейнер `db`. Миграции и сид выполняются при старте. Вход: `admin@example.com` / `admin12345` (меняется через `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `JWT_SECRET`).
 
 ## Документация
 

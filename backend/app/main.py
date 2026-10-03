@@ -1,7 +1,10 @@
 import asyncio
 from contextlib import asynccontextmanager
 
+from pathlib import Path
+
 from fastapi import APIRouter, FastAPI
+from fastapi.responses import FileResponse
 
 from app import scheduler
 from app.api import auth, bookings, notifications, rooms, stats, users
@@ -34,3 +37,13 @@ def health() -> dict:
 
 
 app.include_router(api)
+
+if settings.static_dir:  # прод-образ: SPA раздаётся тем же процессом
+    static = Path(settings.static_dir)
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def spa(path: str):
+        file = (static / path).resolve()
+        if file.is_file() and static.resolve() in file.parents:
+            return FileResponse(file)
+        return FileResponse(static / "index.html")

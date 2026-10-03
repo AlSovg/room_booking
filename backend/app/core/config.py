@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     admin_password: str = "admin12345"
     jwt_secret: str = "dev-secret-change-me-in-production-0123456789"
     cookie_secure: bool = False
+    static_dir: str = ""
     scheduler_enabled: bool = True
     access_ttl_minutes: int = 15
     refresh_ttl_days: int = 7
