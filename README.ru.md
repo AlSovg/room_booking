@@ -80,5 +80,4 @@ npm run build                                  # проверка типов и 
 ## Документация
 
 - [docs/user-guide.ru.md](docs/user-guide.ru.md) — инструкция пользователя ([English](docs/user-guide.md))
-- [PLAN.md](PLAN.md) — план и прогресс
 - [AGENTS.md](AGENTS.md) — контекст и решения для AI-агентов
