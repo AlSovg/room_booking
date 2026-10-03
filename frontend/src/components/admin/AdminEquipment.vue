@@ -5,6 +5,7 @@ import type { components } from "@/api/schema";
 import Icon from "@/components/Icon.vue";
 import { confirmAction, promptText } from "@/utils/dialog";
 import { equipmentIcon } from "@/icons-injection";
+import { t } from "@/i18n";
 import { plural } from "@/utils/time";
 
 type Equipment = components["schemas"]["EquipmentOut"];
@@ -37,17 +38,17 @@ async function add() {
 }
 
 const rename = async (e: Equipment) => {
-  const n = await promptText({ title: "Переименовать оборудование", confirm: "Сохранить", input: e.name });
+  const n = await promptText({ title: t("equip.renameTitle"), confirm: t("common.save"), input: e.name });
   if (n && n !== e.name) run(api.PATCH("/api/v1/equipment/{equipment_id}", { params: { path: { equipment_id: e.id } }, body: { name: n } }));
 };
 
 const remove = async (e: Equipment) =>
-  (await confirmAction({ title: "Удалить оборудование?", text: `«${e.name}» будет удалено.`, confirm: "Удалить", danger: true })) &&
+  (await confirmAction({ title: t("equip.deleteTitle"), text: t("equip.deleteText", { name: e.name }), confirm: t("common.delete"), danger: true })) &&
   run(api.DELETE("/api/v1/equipment/{equipment_id}", { params: { path: { equipment_id: e.id } } }));
 
 const used = (e: Equipment) => {
   const n = usage.value.get(e.id);
-  return n ? `в ${plural(n, ["комнате", "комнатах", "комнатах"])}` : "не используется";
+  return n ? plural(n, "plural.inRooms") : t("equip.unused");
 };
 </script>
 
@@ -57,21 +58,21 @@ const used = (e: Equipment) => {
       <li v-for="e in items" :key="e.id">
         <span class="equip-icon"><Icon :name="equipmentIcon(e.name)" :size="20" /></span>
         <span class="cell-title"><strong>{{ e.name }}</strong><span>{{ used(e) }}</span></span>
-        <button class="btn btn-sm btn-icon" :aria-label="`Переименовать ${e.name}`" :title="`Переименовать ${e.name}`" @click="rename(e)">
+        <button class="btn btn-sm btn-icon" :aria-label="$t('equip.renameAria', { name: e.name })" :title="$t('equip.renameAria', { name: e.name })" @click="rename(e)">
           <Icon name="Pencil" :size="18" />
         </button>
-        <button class="btn btn-sm btn-icon btn-danger" :aria-label="`Удалить ${e.name}`" :title="`Удалить ${e.name}`" @click="remove(e)">
+        <button class="btn btn-sm btn-icon btn-danger" :aria-label="$t('equip.deleteAria', { name: e.name })" :title="$t('equip.deleteAria', { name: e.name })" @click="remove(e)">
           <Icon name="Trash2" :size="18" />
         </button>
       </li>
     </ul>
     <form class="card side-form" @submit.prevent="add">
-      <h2>Новое оборудование</h2>
+      <h2>{{ $t("equip.new") }}</h2>
       <label class="field">
-        Название
-        <input v-model="name" class="input" required maxlength="100" placeholder="Например, Флипчарт" />
+        {{ $t("equip.name") }}
+        <input v-model="name" class="input" required maxlength="100" :placeholder="$t('equip.namePh')" />
       </label>
-      <button class="btn btn-primary" :disabled="!name.trim()"><Icon name="Plus" :size="18" />Добавить</button>
+      <button class="btn btn-primary" :disabled="!name.trim()"><Icon name="Plus" :size="18" />{{ $t("common.add") }}</button>
       <p v-if="error" class="alert" role="alert"><Icon name="CircleAlert" />{{ error }}</p>
     </form>
   </div>

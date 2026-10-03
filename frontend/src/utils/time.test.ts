@@ -1,5 +1,8 @@
-import { expect, test } from "vitest";
+import { beforeAll, expect, test } from "vitest";
+import { locale } from "@/i18n";
 import { addDays, ago, dayRange, dayTitle, freeWindow, hhmm, localParts, nextSlot, plural, roomStatus, zonedToUtc } from "./time";
+
+beforeAll(() => (locale.value = "ru"));
 
 test("локальное время организации (UTC+3) ↔ UTC", () => {
   expect(zonedToUtc("2030-01-15", 10 * 60).toISOString()).toBe("2030-01-15T07:00:00.000Z");
@@ -41,7 +44,20 @@ test("freeWindow, plural, dayTitle", () => {
   const busy = [{ start: 600, end: 690 }, { start: 960, end: 1020 }, { start: 700, end: 720 }];
   expect(freeWindow(busy, 840, 900)).toEqual({ from: 720, to: 960 });
   expect(freeWindow([], 840, 900)).toEqual({ from: 480, to: 1200 });
-  expect([1, 3, 5, 21].map((n) => plural(n, ["комната", "комнаты", "комнат"]))).toEqual(["1 комната", "3 комнаты", "5 комнат", "21 комната"]);
+  expect([1, 3, 5, 21].map((n) => plural(n, "plural.freeRooms"))).toEqual(["Свободна 1 комната", "Свободны 3 комнаты", "Свободны 5 комнат", "Свободна 21 комната"]);
   expect(dayTitle("2030-01-16", "2030-01-15")).toBe("Завтра");
   expect(dayTitle("2030-01-18", "2030-01-15")).toBe("Пятница, 18 января");
+});
+
+test("английская локаль: подписи и plural", () => {
+  locale.value = "en";
+  try {
+    const now = Date.parse("2030-01-15T07:35:00Z");
+    expect(ago("2030-01-15T07:33:00Z", now)).toBe("2 min ago");
+    expect(ago("2030-01-14T15:12:00Z", now)).toBe("yesterday, 18:12");
+    expect(dayTitle("2030-01-18", "2030-01-15")).toBe("Friday, January 18");
+    expect([1, 3].map((n) => plural(n, "plural.bookings"))).toEqual(["1 booking", "3 bookings"]);
+  } finally {
+    locale.value = "ru";
+  }
 });

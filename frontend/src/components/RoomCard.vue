@@ -13,7 +13,7 @@ defineProps<{ room: components["schemas"]["RoomOut"] }>();
         <h2>{{ room.name }}</h2>
         <span v-if="room.location" class="room-loc"><Icon name="MapPin" :size="16" :stroke-width="1.8" />{{ room.location }}</span>
       </div>
-      <span class="cap" :aria-label="`Вместимость до ${room.capacity} человек`"><Icon name="Users" :size="16" />до {{ room.capacity }}</span>
+      <span class="cap" :aria-label="$t('room.capacityAria', { n: room.capacity })"><Icon name="Users" :size="16" />{{ $t("common.upTo", { n: room.capacity }) }}</span>
     </div>
     <p v-if="room.description" class="room-desc">{{ room.description }}</p>
     <ul v-if="room.equipment.length" class="tags">

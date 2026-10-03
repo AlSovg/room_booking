@@ -53,14 +53,14 @@ const status = computed(() => {
 <template>
   <div class="page">
     <div class="page-head">
-      <h1>Комнаты</h1>
-      <span v-if="!loading && total !== null" class="page-sub">найдено {{ rooms.length }} из {{ total }}</span>
+      <h1>{{ $t("nav.rooms") }}</h1>
+      <span v-if="!loading && total !== null" class="page-sub">{{ $t("rooms.found", { n: rooms.length, total }) }}</span>
     </div>
     <form class="filter-bar" @submit.prevent>
       <label class="cap-filter">
-        от
-        <input v-model.number="minCapacity" type="number" min="1" aria-label="Минимальная вместимость" />
-        человек
+        {{ $t("common.from") }}
+        <input v-model.number="minCapacity" type="number" min="1" :aria-label="$t('common.minCapacity')" />
+        {{ $t("common.people") }}
       </label>
       <div class="chips">
         <button
@@ -72,18 +72,18 @@ const status = computed(() => {
       </div>
     </form>
     <p v-if="error" class="alert" role="alert">{{ error }}</p>
-    <p v-else-if="loading && !rooms.length" class="empty">Загрузка…</p>
-    <p v-else-if="!rooms.length" class="empty">Нет комнат под выбранные условия</p>
+    <p v-else-if="loading && !rooms.length" class="empty">{{ $t("common.loading") }}</p>
+    <p v-else-if="!rooms.length" class="empty">{{ $t("common.noRooms") }}</p>
     <div v-else class="room-grid">
       <RoomCard v-for="r in rooms" :key="r.id" :room="r">
         <span class="status">
           <span class="status-dot" :class="{ busy: status[r.id]?.busy }" />
           <template v-if="status[r.id]?.until != null">
-            {{ status[r.id].busy ? "Занята до" : "Свободна до" }} <b class="mono">{{ hhmm(status[r.id].until!) }}</b>
+            {{ $t(status[r.id].busy ? "rooms.busyUntil" : "rooms.freeUntil") }} <b class="mono">{{ hhmm(status[r.id].until!) }}</b>
           </template>
-          <template v-else>Свободна до конца дня</template>
+          <template v-else>{{ $t("rooms.freeAllDay") }}</template>
         </span>
-        <RouterLink :to="`/rooms/${r.id}`" class="room-link"><Icon name="Calendar" :size="18" />Расписание</RouterLink>
+        <RouterLink :to="`/rooms/${r.id}`" class="room-link"><Icon name="Calendar" :size="18" />{{ $t("rooms.schedule") }}</RouterLink>
       </RoomCard>
     </div>
   </div>

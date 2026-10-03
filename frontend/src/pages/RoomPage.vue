@@ -9,7 +9,7 @@ import Icon from "@/components/Icon.vue";
 import { equipmentIcon } from "@/icons-injection";
 import { useAuth } from "@/stores/auth";
 import { useMobile } from "@/utils/mobile";
-import { addDays, hhmm, localParts, nextSlot, roomStatus, todayLocal, zonedToUtc } from "@/utils/time";
+import { addDays, dateFmt, hhmm, localParts, nextSlot, roomStatus, todayLocal, zonedToUtc } from "@/utils/time";
 
 const auth = useAuth();
 const route = useRoute();
@@ -50,16 +50,16 @@ watchEffect(async (onCleanup) => {
 const mobile = useMobile();
 
 const utc = (d: string) => new Date(`${d}T00:00:00Z`);
-const weekday = new Intl.DateTimeFormat("ru", { weekday: "short", timeZone: "UTC" });
-const dayMonth = new Intl.DateTimeFormat("ru", { day: "numeric", month: "long", timeZone: "UTC" });
+const weekday = (d: string) => dateFmt({ weekday: "short", timeZone: "UTC" }).format(utc(d));
+const dayMonth = (d: string) => dateFmt({ day: "numeric", month: "long", timeZone: "UTC" }).format(utc(d));
 const week = computed<Column[]>(() =>
   Array.from({ length: 7 }, (_, i) => {
     const d = addDays(monday.value, i);
-    return { key: d, label: weekday.format(utc(d)).toUpperCase(), date: d, sub: String(utc(d).getUTCDate()) };
+    return { key: d, label: weekday(d).toUpperCase(), date: d, sub: String(utc(d).getUTCDate()) };
   }),
 );
 const columns = computed(() => (mobile.value ? week.value.filter((c) => c.date === date.value) : week.value));
-const weekTitle = computed(() => `${dayMonth.format(utc(monday.value))} – ${dayMonth.format(utc(addDays(monday.value, 6)))}`);
+const weekTitle = computed(() => `${dayMonth(monday.value)} – ${dayMonth(addDays(monday.value, 6))}`);
 
 const status = computed(() => {
   const now = localParts(new Date());
@@ -100,7 +100,7 @@ const created = () => {
 
 <template>
   <div class="page room-page">
-    <RouterLink to="/rooms" class="back-link"><Icon name="ChevronLeft" :size="18" />Все комнаты</RouterLink>
+    <RouterLink to="/rooms" class="back-link"><Icon name="ChevronLeft" :size="18" />{{ $t("room.all") }}</RouterLink>
     <section v-if="room" class="card room-hero">
       <div class="room-hero-info">
         <div class="room-hero-title">
@@ -108,33 +108,33 @@ const created = () => {
           <span class="status">
             <span class="status-dot" :class="{ busy: status.busy }" />
             <template v-if="status.until != null">
-              {{ status.busy ? "Занята до" : "Свободна до" }} <b class="mono">{{ hhmm(status.until) }}</b>
+              {{ $t(status.busy ? "rooms.busyUntil" : "rooms.freeUntil") }} <b class="mono">{{ hhmm(status.until) }}</b>
             </template>
-            <template v-else>Свободна до конца дня</template>
+            <template v-else>{{ $t("rooms.freeAllDay") }}</template>
           </span>
         </div>
         <div class="room-hero-meta">
           <span v-if="room.location"><Icon name="MapPin" :size="18" :stroke-width="1.8" />{{ room.location }}</span>
-          <span><Icon name="Users" :size="18" :stroke-width="1.8" />до {{ room.capacity }} человек</span>
+          <span><Icon name="Users" :size="18" :stroke-width="1.8" />{{ $t("room.upToPeople", { n: room.capacity }) }}</span>
           <ul v-if="room.equipment.length" class="tags">
             <li v-for="e in room.equipment" :key="e.id"><Icon :name="equipmentIcon(e.name)" :size="14" />{{ e.name }}</li>
           </ul>
         </div>
       </div>
-      <button class="btn btn-primary" @click="quickBook"><Icon name="Plus" :size="18" />Забронировать</button>
+      <button class="btn btn-primary" @click="quickBook"><Icon name="Plus" :size="18" />{{ $t("room.book") }}</button>
     </section>
 
     <div class="week-bar">
       <div class="week-nav">
-        <button class="btn btn-sm btn-icon" :aria-label="mobile ? 'Предыдущий день' : 'Предыдущая неделя'" @click="move(-1)"><Icon name="ChevronLeft" :size="18" /></button>
-        <button class="btn btn-sm" @click="date = todayLocal()">Сегодня</button>
-        <button class="btn btn-sm btn-icon" :aria-label="mobile ? 'Следующий день' : 'Следующая неделя'" @click="move(1)"><Icon name="ChevronRight" :size="18" /></button>
+        <button class="btn btn-sm btn-icon" :aria-label="$t(mobile ? 'cal.prevDay' : 'room.prevWeek')" @click="move(-1)"><Icon name="ChevronLeft" :size="18" /></button>
+        <button class="btn btn-sm" @click="date = todayLocal()">{{ $t("cal.today") }}</button>
+        <button class="btn btn-sm btn-icon" :aria-label="$t(mobile ? 'cal.nextDay' : 'room.nextWeek')" @click="move(1)"><Icon name="ChevronRight" :size="18" /></button>
       </div>
       <h2>{{ weekTitle }}</h2>
-      <span class="week-hint">Выделите время в сетке, чтобы забронировать</span>
-      <input v-model="date" type="date" class="date-input" aria-label="Перейти к дате" />
+      <span class="week-hint">{{ $t("room.hint") }}</span>
+      <input v-model="date" type="date" class="date-input" :aria-label="$t('room.goToDate')" />
     </div>
-    <div class="day-strip" role="group" aria-label="День недели">
+    <div class="day-strip" role="group" :aria-label="$t('room.weekday')">
       <button v-for="c in week" :key="c.key" :aria-pressed="c.date === date" @click="date = c.date">
         <span>{{ c.label }}</span><b>{{ c.sub }}</b>
       </button>
@@ -145,7 +145,7 @@ const created = () => {
       :start="selection.start" :end="selection.end" @created="created" @close="selection = null" @show="show"
     />
     <p v-if="error" class="alert" role="alert">{{ error }}</p>
-    <p v-else-if="loading && !room" class="empty">Загрузка…</p>
+    <p v-else-if="loading && !room" class="empty">{{ $t("common.loading") }}</p>
     <CalendarGrid v-else :columns="columns" :items="items" :selection="selection" @select="selection = $event" />
   </div>
 </template>

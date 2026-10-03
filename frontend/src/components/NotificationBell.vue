@@ -8,11 +8,7 @@ import { useDismiss } from "@/utils/dismiss";
 import { ago } from "@/utils/time";
 
 type Kind = components["schemas"]["NotificationType"];
-const KINDS: Record<Kind, { title: string; icon: IconName }> = {
-  reminder: { title: "Скоро начнётся", icon: "Clock" },
-  changed: { title: "Бронь изменена", icon: "Pencil" },
-  cancelled: { title: "Бронь отменена", icon: "CircleX" },
-};
+const KINDS: Record<Kind, IconName> = { reminder: "Clock", changed: "Pencil", cancelled: "CircleX" };
 
 const POLL = 30_000; // решение 8: опрос раз в 30 с
 const count = ref(0);
@@ -61,28 +57,28 @@ onBeforeUnmount(() => clearInterval(timer));
     <button
       class="icon-btn"
       :class="{ active: open }"
-      :aria-label="count ? `Уведомления, ${count} непрочитанных` : 'Уведомления'"
+      :aria-label="count ? $t('notif.ariaUnread', { n: count }) : $t('notif.title')"
       :aria-expanded="open"
       @click="toggle"
     >
       <Icon name="Bell" :size="22" :stroke-width="1.8" />
       <b v-if="count" class="count">{{ count }}</b>
     </button>
-    <div v-if="open" class="popover panel" role="dialog" aria-label="Уведомления">
+    <div v-if="open" class="popover panel" role="dialog" :aria-label="$t('notif.title')">
       <div class="panel-head">
-        <h2>Уведомления<span v-if="count" class="pill">{{ count }} новых</span></h2>
-        <button v-if="count" class="link-btn" @click="readAll"><Icon name="CheckCheck" :size="16" />Прочитать все</button>
+        <h2>{{ $t("notif.title") }}<span v-if="count" class="pill">{{ $t("notif.new", { n: count }) }}</span></h2>
+        <button v-if="count" class="link-btn" @click="readAll"><Icon name="CheckCheck" :size="16" />{{ $t("notif.readAll") }}</button>
       </div>
-      <p v-if="!items.length" class="empty">Уведомлений нет</p>
+      <p v-if="!items.length" class="empty">{{ $t("notif.none") }}</p>
       <ul v-else>
         <li v-for="n in items" :key="n.id">
           <button :class="{ unread: !n.is_read }" @click="read(n)">
-            <span class="kind" :class="n.type"><Icon :name="KINDS[n.type].icon" :size="18" /></span>
+            <span class="kind" :class="n.type"><Icon :name="KINDS[n.type]" :size="18" /></span>
             <span class="body">
-              <span class="row"><b>{{ KINDS[n.type].title }}</b><small>{{ ago(n.created_at) }}</small></span>
+              <span class="row"><b>{{ $t(`notif.kind.${n.type}`) }}</b><small>{{ ago(n.created_at) }}</small></span>
               <span class="text">{{ n.message }}</span>
             </span>
-            <span v-if="!n.is_read" class="dot" aria-label="Не прочитано" />
+            <span v-if="!n.is_read" class="dot" :aria-label="$t('notif.unread')" />
           </button>
         </li>
       </ul>

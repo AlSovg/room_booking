@@ -4,6 +4,7 @@ import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
 import Icon from "@/components/Icon.vue";
 import { confirmAction } from "@/utils/dialog";
+import { t } from "@/i18n";
 import { useAuth } from "@/stores/auth";
 
 type User = components["schemas"]["UserOut"];
@@ -34,7 +35,7 @@ const patch = async (u: User, body: components["schemas"]["UserUpdate"]) =>
   done((await api.PATCH("/api/v1/users/{user_id}", { params: { path: { user_id: u.id } }, body })).error);
 
 async function reset(u: User) {
-  if (!(await confirmAction({ title: "Сбросить пароль?", text: `Для ${u.email} будет создан новый временный пароль, старый перестанет работать.`, confirm: "Сбросить" }))) return;
+  if (!(await confirmAction({ title: t("users.resetTitle"), text: t("users.resetText", { email: u.email }), confirm: t("users.resetConfirm") }))) return;
   const { data, error: e } = await api.POST("/api/v1/users/{user_id}/reset-password", { params: { path: { user_id: u.id } } });
   if (await done(e)) password.value = { email: u.email, value: data!.temporary_password };
 }
@@ -45,35 +46,35 @@ const initials = (n: string) => n.split(/\s+/).slice(0, 2).map((w) => w[0]).join
 
 <template>
   <form class="card user-form" @submit.prevent="create">
-    <label class="field">ФИО<input v-model="form.full_name" class="input" required placeholder="Фамилия Имя" /></label>
+    <label class="field">{{ $t("users.fullName") }}<input v-model="form.full_name" class="input" required :placeholder="$t('users.fullNamePh')" /></label>
     <label class="field">
       <span class="field-label"><Icon name="Mail" :size="15" />Email</span>
       <input v-model="form.email" type="email" class="input" required placeholder="name@example.com" />
     </label>
     <label class="field role-field">
-      Роль
-      <select v-model="form.role" class="input"><option value="employee">Сотрудник</option><option value="admin">Администратор</option></select>
+      {{ $t("users.role") }}
+      <select v-model="form.role" class="input"><option value="employee">{{ $t("user.employee") }}</option><option value="admin">{{ $t("user.admin") }}</option></select>
     </label>
-    <button class="btn btn-primary"><Icon name="UserPlus" :size="18" />Создать</button>
+    <button class="btn btn-primary"><Icon name="UserPlus" :size="18" />{{ $t("users.create") }}</button>
   </form>
   <div v-if="password" class="password-note" role="status">
     <span class="password-icon"><Icon name="KeyRound" :size="18" /></span>
     <span class="cell-title">
-      <b>Временный пароль для {{ password.email }} — показан один раз</b>
+      <b>{{ $t("users.tempPassword", { email: password.email }) }}</b>
       <code class="mono">{{ password.value }}</code>
     </span>
-    <button class="btn btn-sm" @click="copy"><Icon name="Copy" :size="16" />Скопировать</button>
-    <button class="icon-btn" aria-label="Скрыть" @click="password = null"><Icon name="X" :size="18" /></button>
+    <button class="btn btn-sm" @click="copy"><Icon name="Copy" :size="16" />{{ $t("users.copy") }}</button>
+    <button class="icon-btn" :aria-label="$t('users.hide')" @click="password = null"><Icon name="X" :size="18" /></button>
   </div>
   <p v-if="error" class="alert" role="alert"><Icon name="CircleAlert" />{{ error }}</p>
   <div class="table-wrap card">
     <table class="table">
       <thead>
         <tr>
-          <th>Пользователь</th>
-          <th style="width: 190px">Роль</th>
-          <th style="width: 170px">Статус</th>
-          <th style="width: 160px"><span class="sr-only">Действия</span></th>
+          <th>{{ $t("users.user") }}</th>
+          <th style="width: 190px">{{ $t("users.role") }}</th>
+          <th style="width: 170px">{{ $t("common.status") }}</th>
+          <th style="width: 160px"><span class="sr-only">{{ $t("common.actions") }}</span></th>
         </tr>
       </thead>
       <tbody>
@@ -85,32 +86,32 @@ const initials = (n: string) => n.split(/\s+/).slice(0, 2).map((w) => w[0]).join
             </span>
           </td>
           <td>
-            <span v-if="u.role === 'admin'" class="badge brand"><Icon name="Shield" :size="13" :stroke-width="2.4" />Администратор</span>
-            <span v-else class="badge off"><Icon name="Users" :size="13" :stroke-width="2.4" />Сотрудник</span>
+            <span v-if="u.role === 'admin'" class="badge brand"><Icon name="Shield" :size="13" :stroke-width="2.4" />{{ $t("user.admin") }}</span>
+            <span v-else class="badge off"><Icon name="Users" :size="13" :stroke-width="2.4" />{{ $t("user.employee") }}</span>
           </td>
-          <td><span class="badge" :class="u.is_active ? 'ok' : 'bad'"><i />{{ u.is_active ? "Активен" : "Заблокирован" }}</span></td>
+          <td><span class="badge" :class="u.is_active ? 'ok' : 'bad'"><i />{{ $t(u.is_active ? "users.active" : "users.blocked") }}</span></td>
           <td class="actions">
-            <span v-if="u.id === me" class="none">это вы</span>
+            <span v-if="u.id === me" class="none">{{ $t("users.you") }}</span>
             <span v-else>
               <button
-                class="btn btn-sm btn-icon" :aria-label="u.role === 'admin' ? 'Сделать сотрудником' : 'Сделать администратором'"
-                :title="u.role === 'admin' ? 'Сделать сотрудником' : 'Сделать администратором'"
+                class="btn btn-sm btn-icon" :aria-label="$t(u.role === 'admin' ? 'users.makeEmployee' : 'users.makeAdmin')"
+                :title="$t(u.role === 'admin' ? 'users.makeEmployee' : 'users.makeAdmin')"
                 @click="patch(u, { role: u.role === 'admin' ? 'employee' : 'admin' })"
               >
                 <Icon name="Shield" :size="18" />
               </button>
-              <button class="btn btn-sm btn-icon" :aria-label="`Сбросить пароль ${u.email}`" :title="`Сбросить пароль ${u.email}`" @click="reset(u)">
+              <button class="btn btn-sm btn-icon" :aria-label="$t('users.resetAria', { email: u.email })" :title="$t('users.resetAria', { email: u.email })" @click="reset(u)">
                 <Icon name="KeyRound" :size="18" />
               </button>
               <button
-                v-if="u.is_active" class="btn btn-sm btn-icon btn-danger" :aria-label="`Заблокировать ${u.full_name}`"
-                :title="`Заблокировать ${u.full_name}`" @click="patch(u, { is_active: false })"
+                v-if="u.is_active" class="btn btn-sm btn-icon btn-danger" :aria-label="$t('users.blockAria', { name: u.full_name })"
+                :title="$t('users.blockAria', { name: u.full_name })" @click="patch(u, { is_active: false })"
               >
                 <Icon name="Ban" :size="18" />
               </button>
               <button
-                v-else class="btn btn-sm btn-icon" :aria-label="`Разблокировать ${u.full_name}`"
-                :title="`Разблокировать ${u.full_name}`" @click="patch(u, { is_active: true })"
+                v-else class="btn btn-sm btn-icon" :aria-label="$t('users.unblockAria', { name: u.full_name })"
+                :title="$t('users.unblockAria', { name: u.full_name })" @click="patch(u, { is_active: true })"
               >
                 <Icon name="LockOpen" :size="18" />
               </button>

@@ -2,7 +2,7 @@
 
 **English** · [Русский](user-guide.ru.md)
 
-The app runs in a browser (http://localhost:8000 in the Docker setup). Accounts are created by an administrator; there is no self-registration. The interface is in Russian; button and section names below are given in English with the Russian label in parentheses where it helps.
+The app runs in a browser (http://localhost:8000 in the Docker setup). Accounts are created by an administrator; there is no self-registration. The interface is available in Russian and English: switch the language with the "EN" / "RU" button in the header (or on the sign-in page). Button names below are given in English, with the Russian label in parentheses where it helps.
 
 ## 1. Signing in and roles
 

@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import Icon from "@/components/Icon.vue";
+import LangSwitch from "@/components/LangSwitch.vue";
 import { useAuth } from "@/stores/auth";
 
 const auth = useAuth();
@@ -23,13 +24,14 @@ async function submit() {
 
 <template>
   <div class="login-page">
+    <LangSwitch class="login-lang" />
     <div class="logo login-logo">
-      <span class="logo-mark"><Icon name="Calendar" :size="22" :stroke-width="2.2" /></span>Переговорные
+      <span class="logo-mark"><Icon name="Calendar" :size="22" :stroke-width="2.2" /></span>{{ $t("app.name") }}
     </div>
     <form class="login" :class="{ invalid: error }" @submit.prevent="submit">
       <div class="login-head">
-        <h1>Вход</h1>
-        <span>Рабочая почта и пароль</span>
+        <h1>{{ $t("login.title") }}</h1>
+        <span>{{ $t("login.subtitle") }}</span>
       </div>
       <div v-if="error" class="alert" role="alert"><Icon name="CircleAlert" :size="18" />{{ error }}</div>
       <label class="field">
@@ -40,14 +42,14 @@ async function submit() {
         </span>
       </label>
       <label class="field">
-        Пароль
+        {{ $t("login.password") }}
         <span class="control">
           <Icon name="Lock" :size="18" :stroke-width="1.8" />
           <input v-model="password" :type="shown ? 'text' : 'password'" autocomplete="current-password" required />
           <button
             type="button"
             class="icon-btn reveal"
-            :aria-label="shown ? 'Скрыть пароль' : 'Показать пароль'"
+            :aria-label="shown ? $t('login.hide') : $t('login.show')"
             :aria-pressed="shown"
             @click="shown = !shown"
           >
@@ -55,8 +57,8 @@ async function submit() {
           </button>
         </span>
       </label>
-      <button class="btn btn-primary btn-lg" :disabled="busy"><Icon name="LogIn" :size="18" :stroke-width="2.2" />Войти</button>
-      <p class="login-note">Нет доступа — напишите администратору</p>
+      <button class="btn btn-primary btn-lg" :disabled="busy"><Icon name="LogIn" :size="18" :stroke-width="2.2" />{{ $t("login.submit") }}</button>
+      <p class="login-note">{{ $t("login.note") }}</p>
     </form>
   </div>
 </template>

@@ -1,4 +1,5 @@
 import createClient, { type Middleware } from "openapi-fetch";
+import { i18n } from "@/i18n";
 import type { components, paths } from "./schema";
 
 export type User = components["schemas"]["UserOut"];
@@ -47,8 +48,10 @@ const authMiddleware: Middleware = {
 };
 api.use(authMiddleware);
 
-/** Текст ошибки из формата {"error": {message}} или запасной. */
+/** Текст ошибки: перевод по коду (если он есть для языка), иначе сообщение сервера (оно на русском). */
 export function errorMessage(e: unknown): string {
-  const m = (e as { error?: { message?: string } } | undefined)?.error?.message;
-  return m ?? "Не удалось выполнить запрос";
+  const err = (e as { error?: { code?: string; message?: string } } | undefined)?.error;
+  const { t, te } = i18n.global;
+  if (err?.code && te(`errors.${err.code}`)) return t(`errors.${err.code}`);
+  return err?.message ?? t("errors.request");
 }

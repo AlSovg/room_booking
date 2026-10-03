@@ -1,3 +1,5 @@
+import { locale, t } from "@/i18n";
+
 // Единственное место работы с часовыми поясами: API в UTC, интерфейс — в зоне организации.
 export const ORG_TZ = "Europe/Moscow";
 export const DAY_START = 8 * 60; // рабочий день, минуты от полуночи
@@ -37,14 +39,25 @@ export const dayRange = (date: string) => ({
 export const hhmm = (minutes: number) =>
   `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 
+const fmts = new Map<string, Intl.DateTimeFormat>();
+/** Форматтер дат под текущий язык интерфейса (кэш по языку и параметрам). */
+export function dateFmt(opts: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = locale.value + JSON.stringify(opts);
+  let f = fmts.get(key);
+  if (!f) fmts.set(key, (f = new Intl.DateTimeFormat(locale.value, opts)));
+  return f;
+}
+
 /** Подпись времени уведомления: «5 мин назад», «сегодня, 09:10», «вчера, 18:12», «28.09, 14:00». */
 export function ago(iso: string, now = Date.now()): string {
   const min = Math.floor((now - Date.parse(iso)) / 60_000);
-  if (min < 1) return "только что";
-  if (min < 60) return `${min} мин назад`;
+  if (min < 1) return t("time.justNow");
+  if (min < 60) return t("time.minAgo", { n: min });
   const { date, minutes } = localParts(new Date(iso));
   const today = localParts(new Date(now)).date;
-  const day = date === today ? "сегодня" : date === addDays(today, -1) ? "вчера" : `${date.slice(8)}.${date.slice(5, 7)}`;
+  const day =
+    date === today ? t("time.today") : date === addDays(today, -1) ? t("time.yesterday")
+    : dateFmt({ day: "2-digit", month: "2-digit", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
   return `${day}, ${hhmm(minutes)}`;
 }
 
@@ -77,16 +90,13 @@ export function freeWindow(busy: { start: number; end: number }[], start: number
   };
 }
 
-const PLURAL = new Intl.PluralRules("ru");
-/** plural(5, ["участник", "участника", "участников"]) → «5 участников» */
-export const plural = (n: number, [one, few, many]: [string, string, string]) =>
-  `${n} ${{ one, few, many }[PLURAL.select(n) as "one" | "few" | "many"] ?? many}`;
+/** plural(5, "plural.rooms") → «5 комнат»; формы слова лежат в локалях («{n} комната | {n} комнаты | {n} комнат») */
+export const plural = (n: number, key: string) => t(key, { n }, n);
 
-const DAY_TITLE = new Intl.DateTimeFormat("ru", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
 /** «Сегодня», «Завтра», «Вчера» или «Пятница, 2 октября» */
 export function dayTitle(date: string, today = todayLocal()): string {
-  const near = { [today]: "Сегодня", [addDays(today, 1)]: "Завтра", [addDays(today, -1)]: "Вчера" }[date];
-  if (near) return near;
-  const t = DAY_TITLE.format(new Date(`${date}T00:00:00Z`));
-  return t[0].toUpperCase() + t.slice(1);
+  const near = { [today]: "time.todayCap", [addDays(today, 1)]: "time.tomorrow", [addDays(today, -1)]: "time.yesterdayCap" }[date];
+  if (near) return t(near);
+  const s = dateFmt({ weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`));
+  return s[0].toUpperCase() + s.slice(1);
 }

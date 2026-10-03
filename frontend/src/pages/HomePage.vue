@@ -5,9 +5,10 @@ import type { components } from "@/api/schema";
 import BookingForm from "@/components/BookingForm.vue";
 import CalendarGrid, { type Column, type Item, type Selection } from "@/components/CalendarGrid.vue";
 import Icon from "@/components/Icon.vue";
+import { t } from "@/i18n";
 import { useAuth } from "@/stores/auth";
 import { useMobile } from "@/utils/mobile";
-import { addDays, dayRange, nextSlot, todayLocal, zonedToUtc } from "@/utils/time";
+import { addDays, dateFmt, dayRange, nextSlot, todayLocal, zonedToUtc } from "@/utils/time";
 
 const auth = useAuth();
 const date = ref(todayLocal());
@@ -45,14 +46,14 @@ const columns = computed<Column[]>(() =>
     .filter((r) => !mobile.value || r === active.value)
     .map((r) => ({
       key: String(r.id), label: r.name, date: date.value,
-      hint: [r.location, `до ${r.capacity} чел.`].filter(Boolean).join(" · "),
+      hint: [r.location, t("cal.upToShort", { n: r.capacity })].filter(Boolean).join(" · "),
     })),
 );
 
 const dateTitle = computed(() => {
-  const f = new Intl.DateTimeFormat("ru", { weekday: mobile.value ? "short" : "long", day: "numeric", month: "long", timeZone: "UTC" });
-  const t = f.format(new Date(`${date.value}T00:00:00Z`));
-  return t[0].toUpperCase() + t.slice(1);
+  const f = dateFmt({ weekday: mobile.value ? "short" : "long", day: "numeric", month: "long", timeZone: "UTC" });
+  const s = f.format(new Date(`${date.value}T00:00:00Z`));
+  return s[0].toUpperCase() + s.slice(1);
 });
 const items = computed<Item[]>(() =>
   bookings.value.map((b) => ({
@@ -90,34 +91,34 @@ const created = () => {
   <div class="page cal-page">
     <div class="day-bar">
       <div class="week-nav">
-        <button class="btn btn-sm btn-icon" aria-label="Предыдущий день" @click="move(-1)"><Icon name="ChevronLeft" :size="18" /></button>
-        <button class="btn btn-sm" @click="date = todayLocal()">Сегодня</button>
-        <button class="btn btn-sm btn-icon" aria-label="Следующий день" @click="move(1)"><Icon name="ChevronRight" :size="18" /></button>
+        <button class="btn btn-sm btn-icon" :aria-label="$t('cal.prevDay')" @click="move(-1)"><Icon name="ChevronLeft" :size="18" /></button>
+        <button class="btn btn-sm" @click="date = todayLocal()">{{ $t("cal.today") }}</button>
+        <button class="btn btn-sm btn-icon" :aria-label="$t('cal.nextDay')" @click="move(1)"><Icon name="ChevronRight" :size="18" /></button>
       </div>
       <h1>{{ dateTitle }}</h1>
       <div class="legend" aria-hidden="true">
-        <span><i class="own" />Мои</span><span><i />Чужие</span><span><i class="over" />Прошло</span>
+        <span><i class="own" />{{ $t("cal.mine") }}</span><span><i />{{ $t("cal.others") }}</span><span><i class="over" />{{ $t("cal.past") }}</span>
       </div>
       <label class="cap-filter">
-        от
-        <input v-model.number="minCapacity" type="number" min="1" aria-label="Минимальная вместимость" />
-        человек
+        {{ $t("common.from") }}
+        <input v-model.number="minCapacity" type="number" min="1" :aria-label="$t('common.minCapacity')" />
+        {{ $t("common.people") }}
       </label>
     </div>
-    <div class="chips room-chips" role="group" aria-label="Комната">
+    <div class="chips room-chips" role="group" :aria-label="$t('common.room')">
       <button
         v-for="r in rooms" :key="r.id" type="button" class="chip"
         :aria-pressed="r === active" @click="activeId = r.id; selection = null"
-      >{{ r.name }}<span>до {{ r.capacity }}</span></button>
+      >{{ r.name }}<span>{{ $t("common.upTo", { n: r.capacity }) }}</span></button>
     </div>
-    <p v-if="active" class="cal-hint"><Icon name="MapPin" :size="16" />{{ [active.name, active.location].filter(Boolean).join(" · ") }} · нажмите на свободное время, чтобы забронировать</p>
+    <p v-if="active" class="cal-hint"><Icon name="MapPin" :size="16" />{{ [active.name, active.location].filter(Boolean).join(" · ") }} · {{ $t("cal.hint") }}</p>
 
     <p v-if="error" class="alert" role="alert">{{ error }}</p>
-    <p v-else-if="loading && !rooms.length" class="empty">Загрузка…</p>
-    <p v-else-if="!rooms.length" class="empty">Нет комнат под выбранные условия</p>
+    <p v-else-if="loading && !rooms.length" class="empty">{{ $t("common.loading") }}</p>
+    <p v-else-if="!rooms.length" class="empty">{{ $t("common.noRooms") }}</p>
     <CalendarGrid v-else :columns="columns" :items="items" :selection="selection" :row="24" @select="selection = $event" />
 
-    <button class="fab" aria-label="Новая бронь" @click="quickBook"><Icon name="Plus" :size="26" /></button>
+    <button class="fab" :aria-label="$t('cal.newBooking')" @click="quickBook"><Icon name="Plus" :size="26" /></button>
     <BookingForm
       v-if="selection && selRoom" :key="selection.start.getTime() + selection.col" :rooms="rooms" :room-id="selRoom.id"
       :start="selection.start" :end="selection.end" @created="created" @close="selection = null" @show="show"

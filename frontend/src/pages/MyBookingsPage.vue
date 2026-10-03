@@ -4,12 +4,13 @@ import { api, errorMessage } from "@/api/client";
 import type { components } from "@/api/schema";
 import BookingForm from "@/components/BookingForm.vue";
 import Icon from "@/components/Icon.vue";
+import { t } from "@/i18n";
 import { confirmAction } from "@/utils/dialog";
-import { dayTitle, hhmm, localParts, plural, todayLocal } from "@/utils/time";
+import { dateFmt, dayTitle, hhmm, localParts, plural, todayLocal } from "@/utils/time";
 
 type Booking = components["schemas"]["BookingOut"];
 type Scope = "upcoming" | "past" | "cancelled";
-const scopes: [Scope, string][] = [["upcoming", "Предстоящие"], ["past", "Прошедшие"], ["cancelled", "Отменённые"]];
+const scopes: Scope[] = ["upcoming", "past", "cancelled"];
 const scope = ref<Scope>("upcoming");
 const rooms = ref<components["schemas"]["RoomOut"][]>([]);
 const bookings = ref<Booking[]>([]);
@@ -33,7 +34,7 @@ watchEffect(async (onCleanup) => {
 });
 
 async function cancel(b: Booking) {
-  if (!(await confirmAction({ title: "Отменить бронь?", text: `«${b.title}» будет отменена, комната освободится.`, confirm: "Отменить бронь", danger: true }))) return;
+  if (!(await confirmAction({ title: t("my.cancelTitle"), text: t("my.cancelText", { title: b.title }), confirm: t("my.cancelConfirm"), danger: true }))) return;
   const { error: e } = await api.POST("/api/v1/bookings/{booking_id}/cancel", { params: { path: { booking_id: b.id } } });
   if (e) error.value = errorMessage(e);
   else version.value++;
@@ -45,7 +46,7 @@ const saved = () => {
 };
 
 const today = todayLocal();
-const weekday = new Intl.DateTimeFormat("ru", { weekday: "short", timeZone: "UTC" });
+
 const now = Date.now();
 
 // брони по дням в порядке API
@@ -57,11 +58,11 @@ const groups = computed(() => {
   }
   return [...map].map(([date, list]) => ({
     date, list, title: dayTitle(date, today),
-    wd: weekday.format(new Date(`${date}T00:00:00Z`)).toUpperCase(), day: +date.slice(8),
+    wd: dateFmt({ weekday: "short", timeZone: "UTC" }).format(new Date(`${date}T00:00:00Z`)).toUpperCase(), day: +date.slice(8),
   }));
 });
 
-const roomName = (id: number) => rooms.value.find((r) => r.id === id)?.name ?? `Комната №${id}`;
+const roomName = (id: number) => rooms.value.find((r) => r.id === id)?.name ?? t("my.roomN", { id });
 const time = (b: Booking) => `${hhmm(localParts(new Date(b.start_at)).minutes)}–${hhmm(localParts(new Date(b.end_at)).minutes || 1440)}`;
 // «через N мин» — если начало в ближайший час
 const soon = (b: Booking) => {
@@ -73,14 +74,14 @@ const soon = (b: Booking) => {
 <template>
   <div class="page my-page">
     <div class="my-head">
-      <h1>Мои брони</h1>
-      <div role="tablist" aria-label="Период" class="segmented">
-        <button v-for="[k, l] in scopes" :key="k" role="tab" :aria-selected="scope === k" @click="scope = k">{{ l }}</button>
+      <h1>{{ $t("nav.my") }}</h1>
+      <div role="tablist" :aria-label="$t('my.period')" class="segmented">
+        <button v-for="k in scopes" :key="k" role="tab" :aria-selected="scope === k" @click="scope = k">{{ $t(`my.scope.${k}`) }}</button>
       </div>
     </div>
     <p v-if="error" class="alert" role="alert"><Icon name="CircleAlert" />{{ error }}</p>
-    <p v-else-if="loading && !bookings.length" class="empty">Загрузка…</p>
-    <p v-else-if="!bookings.length" class="empty">Нет броней</p>
+    <p v-else-if="loading && !bookings.length" class="empty">{{ $t("common.loading") }}</p>
+    <p v-else-if="!bookings.length" class="empty">{{ $t("my.none") }}</p>
     <section v-for="g in groups" :key="g.date" class="day-group">
       <h2>{{ g.title }}</h2>
       <ul class="card booking-list">
@@ -91,13 +92,13 @@ const soon = (b: Booking) => {
             <b>{{ b.title }}</b>
             <span>
               <span><Icon name="DoorOpen" :size="14" />{{ roomName(b.room_id) }}</span>
-              <span><Icon name="Users" :size="14" />{{ plural(b.attendees, ["участник", "участника", "участников"]) }}</span>
+              <span><Icon name="Users" :size="14" />{{ plural(b.attendees, "plural.attendees") }}</span>
             </span>
           </div>
-          <span v-if="scope === 'upcoming' && soon(b)" class="soon"><Icon name="Clock" :size="14" />через {{ soon(b) }} мин</span>
+          <span v-if="scope === 'upcoming' && soon(b)" class="soon"><Icon name="Clock" :size="14" />{{ $t("my.soon", { n: soon(b) }) }}</span>
           <div v-if="scope === 'upcoming' && b.can_edit" class="booking-actions">
-            <button class="btn btn-sm" @click="editing = b"><Icon name="Pencil" :size="16" />Изменить</button>
-            <button class="btn btn-sm btn-icon btn-danger" :aria-label="`Отменить бронь «${b.title}»`" :title="`Отменить бронь «${b.title}»`" @click="cancel(b)">
+            <button class="btn btn-sm" @click="editing = b"><Icon name="Pencil" :size="16" />{{ $t("common.edit") }}</button>
+            <button class="btn btn-sm btn-icon btn-danger" :aria-label="$t('my.cancelAria', { title: b.title })" :title="$t('my.cancelAria', { title: b.title })" @click="cancel(b)">
               <Icon name="Trash2" :size="18" />
             </button>
           </div>

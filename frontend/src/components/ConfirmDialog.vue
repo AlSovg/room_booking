@@ -34,11 +34,11 @@ const closed = () => {
           <h2 id="confirm-title">{{ dialog.title }}</h2>
           <span v-if="dialog.text">{{ dialog.text }}</span>
         </div>
-        <button type="button" class="icon-btn modal-close" aria-label="Закрыть" @click="el!.close()"><Icon name="X" /></button>
+        <button type="button" class="icon-btn modal-close" :aria-label="$t('common.close')" @click="el!.close()"><Icon name="X" /></button>
       </div>
       <input v-if="dialog.input !== undefined" v-model="value" class="input" autofocus required maxlength="100" aria-labelledby="confirm-title" />
       <div class="modal-actions">
-        <button type="button" class="btn" @click="el!.close()">Отмена</button>
+        <button type="button" class="btn" @click="el!.close()">{{ $t("common.cancel") }}</button>
         <button class="btn" :class="dialog.danger ? 'btn-danger' : 'btn-primary'">{{ dialog.confirm }}</button>
       </div>
     </form>

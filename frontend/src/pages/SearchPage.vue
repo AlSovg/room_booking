@@ -70,36 +70,36 @@ const free = (id: number) => freeWindow(roomBusy(id), last.value.start, last.val
 const summary = computed(() => {
   const l = last.value;
   const day = dayTitle(l.date).toLowerCase();
-  return [day, `от ${plural(l.capacity, ["человека", "человек", "человек"])}`, ...l.equipment];
+  return [day, plural(l.capacity, "plural.fromPeople"), ...l.equipment];
 });
 const interval = () => ({ start: zonedToUtc(last.value.date, last.value.start), end: zonedToUtc(last.value.date, last.value.end) });
 </script>
 
 <template>
   <div class="page search-page">
-    <h1 class="search-title">Поиск свободной комнаты</h1>
+    <h1 class="search-title">{{ $t("search.title") }}</h1>
     <form class="card search-form" @submit.prevent="search">
       <div class="search-fields">
         <label class="field search-date">
-          <span class="field-label"><Icon name="Calendar" :size="15" />Дата</span>
+          <span class="field-label"><Icon name="Calendar" :size="15" />{{ $t("booking.date") }}</span>
           <input v-model="date" type="date" class="input" :min="todayLocal()" required />
         </label>
         <label class="field">
-          <span class="field-label"><Icon name="Clock" :size="15" />С</span>
+          <span class="field-label"><Icon name="Clock" :size="15" />{{ $t("search.from") }}</span>
           <input v-model="from" type="time" class="input mono" step="900" min="08:00" max="20:00" required />
         </label>
         <label class="field">
-          <span class="field-label"><Icon name="Clock" :size="15" />До</span>
+          <span class="field-label"><Icon name="Clock" :size="15" />{{ $t("search.to") }}</span>
           <input v-model="to" type="time" class="input mono" step="900" min="08:00" max="20:00" required />
         </label>
         <label class="field">
-          <span class="field-label"><Icon name="Users" :size="15" />Участников</span>
+          <span class="field-label"><Icon name="Users" :size="15" />{{ $t("booking.attendees") }}</span>
           <input v-model.number="minCapacity" type="number" class="input mono" min="1" />
         </label>
-        <button class="btn btn-primary search-submit"><Icon name="Search" :size="18" />Найти</button>
+        <button class="btn btn-primary search-submit"><Icon name="Search" :size="18" />{{ $t("search.find") }}</button>
       </div>
       <div class="search-equipment">
-        <span>Нужно оборудование</span>
+        <span>{{ $t("search.equipment") }}</span>
         <div class="chips">
           <button
             v-for="e in equipment" :key="e.id" type="button" class="chip"
@@ -114,14 +114,14 @@ const interval = () => ({ start: zonedToUtc(last.value.date, last.value.start), 
     <p v-if="error" class="alert" role="alert"><Icon name="CircleAlert" />{{ error }}</p>
     <template v-else-if="rooms">
       <div class="results-head">
-        <h2>{{ rooms.length ? `${rooms.length === 1 ? "Свободна" : "Свободны"} ${plural(rooms.length, ["комната", "комнаты", "комнат"])}` : "Свободных комнат нет" }}</h2>
+        <h2>{{ rooms.length ? plural(rooms.length, "plural.freeRooms") : $t("search.none") }}</h2>
         <span class="results-sub">
           {{ summary[0] }} · <span class="mono">{{ hhmm(last.start) }}–{{ hhmm(last.end) }}</span>
           <template v-for="s in summary.slice(1)" :key="s"> · {{ s }}</template>
         </span>
         <span class="legend">
-          <span><i class="mine" />Ваш интервал</span>
-          <span><i />Занято</span>
+          <span><i class="mine" />{{ $t("search.yourSlot") }}</span>
+          <span><i />{{ $t("search.busy") }}</span>
         </span>
       </div>
       <ul v-if="rooms.length" class="card results">
@@ -131,18 +131,18 @@ const interval = () => ({ start: zonedToUtc(last.value.date, last.value.start), 
               <RouterLink :to="`/rooms/${r.id}`">{{ r.name }}</RouterLink>
               <span>
                 <span v-if="r.location"><Icon name="MapPin" :size="14" :stroke-width="1.8" />{{ r.location }}</span>
-                <span><Icon name="Users" :size="14" :stroke-width="1.8" />до {{ r.capacity }}</span>
+                <span><Icon name="Users" :size="14" :stroke-width="1.8" />{{ $t("common.upTo", { n: r.capacity }) }}</span>
               </span>
             </div>
             <ul v-if="r.equipment.length" class="tags">
               <li v-for="e in r.equipment" :key="e.id"><Icon :name="equipmentIcon(e.name)" :size="14" />{{ e.name }}</li>
             </ul>
           </div>
-          <div class="timeline" :aria-label="`Занятость ${r.name} на день`">
+          <div class="timeline" :aria-label="$t('search.dayBusyAria', { name: r.name })">
             <div class="timeline-bar">
               <div v-if="now !== null" class="timeline-past" :style="{ width: pct(now) }" />
               <div
-                v-for="(b, i) in roomBusy(r.id)" :key="i" class="timeline-busy" :title="`Занято ${hhmm(b.start)}–${hhmm(b.end)}`"
+                v-for="(b, i) in roomBusy(r.id)" :key="i" class="timeline-busy" :title="`${$t('search.busy')} ${hhmm(b.start)}–${hhmm(b.end)}`"
                 :style="{ left: pct(b.start), width: width(b.start, b.end) }"
               />
               <div class="timeline-mine" :style="{ left: pct(last.start), width: width(last.start, last.end) }" />
@@ -152,8 +152,8 @@ const interval = () => ({ start: zonedToUtc(last.value.date, last.value.start), 
               <span v-for="t in ticks" :key="t" :style="{ left: pct(t) }">{{ hhmm(t).slice(0, 2) }}</span>
             </div>
           </div>
-          <span class="result-free">Свободна <span class="mono">{{ hhmm(free(r.id).from) }}–{{ hhmm(free(r.id).to) }}</span></span>
-          <button class="btn btn-primary" @click="chosen = r"><Icon name="Plus" :size="18" />Забронировать</button>
+          <span class="result-free">{{ $t("search.free") }} <span class="mono">{{ hhmm(free(r.id).from) }}–{{ hhmm(free(r.id).to) }}</span></span>
+          <button class="btn btn-primary" @click="chosen = r"><Icon name="Plus" :size="18" />{{ $t("booking.book") }}</button>
         </li>
       </ul>
     </template>

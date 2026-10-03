@@ -6,7 +6,7 @@ A web app for booking meeting rooms: room list, creating, changing and cancellin
 
 How to use the app: [docs/user-guide.md](docs/user-guide.md) ([Русская версия](docs/user-guide.ru.md)).
 
-> The UI, the seed data and most project documents are in Russian.
+> The UI is available in Russian and English (the language button in the header; the choice is remembered in the browser). The seed data and most project documents are in Russian.
 
 ## Stack
 

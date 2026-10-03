@@ -7,9 +7,9 @@ import AdminUsers from "@/components/admin/AdminUsers.vue";
 import type { IconName } from "@/icons-injection";
 
 const tabs = {
-  rooms: ["Комнаты", "DoorOpen", AdminRooms],
-  equipment: ["Оборудование", "Projector", AdminEquipment],
-  users: ["Пользователи", "Users", AdminUsers],
+  rooms: ["nav.rooms", "DoorOpen", AdminRooms],
+  equipment: ["admin.equipment", "Projector", AdminEquipment],
+  users: ["admin.users", "Users", AdminUsers],
 } as const satisfies Record<string, readonly [string, IconName, unknown]>;
 const tab = ref<keyof typeof tabs>("rooms");
 const rooms = ref<InstanceType<typeof AdminRooms> | null>(null);
@@ -18,12 +18,12 @@ const rooms = ref<InstanceType<typeof AdminRooms> | null>(null);
 <template>
   <div class="page admin-page">
     <div class="my-head">
-      <h1 class="title-icon"><Icon name="Wrench" :size="26" />Администрирование</h1>
-      <button v-if="tab === 'rooms'" class="btn btn-primary" @click="rooms?.create()"><Icon name="Plus" :size="18" />Добавить комнату</button>
+      <h1 class="title-icon"><Icon name="Wrench" :size="26" />{{ $t("user.adminPanel") }}</h1>
+      <button v-if="tab === 'rooms'" class="btn btn-primary" @click="rooms?.create()"><Icon name="Plus" :size="18" />{{ $t("admin.addRoom") }}</button>
     </div>
-    <div role="tablist" aria-label="Разделы администрирования" class="segmented admin-tabs">
+    <div role="tablist" :aria-label="$t('admin.sections')" class="segmented admin-tabs">
       <button v-for="(t, k) in tabs" :key="k" role="tab" :aria-selected="tab === k" @click="tab = k">
-        <Icon :name="t[1]" :size="17" />{{ t[0] }}
+        <Icon :name="t[1]" :size="17" />{{ $t(t[0]) }}
       </button>
     </div>
     <AdminRooms v-if="tab === 'rooms'" ref="rooms" />
